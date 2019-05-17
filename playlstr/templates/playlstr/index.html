@@ -1,0 +1,9 @@
+{% if latest_playlist_list %}
+    <ul>
+    {% for playlist in latest_playlist_list %}
+        <li><a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No playlists are available.</p>
+{% endif %}
