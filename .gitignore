@@ -3,6 +3,9 @@ playlstr/bin/
 playlstr/include/
 playlstr/lib/
 playlstr/migrations/
+playlstr/apikeys.py
+Pipfile
+
 # Created by https://www.gitignore.io/api/django,python
 # Edit at https://www.gitignore.io/?templates=django,python
 

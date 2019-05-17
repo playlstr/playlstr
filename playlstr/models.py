@@ -28,6 +28,9 @@ class Track(models.Model):
 
 
 class Playlist(models.Model):
+    """
+    A playlist
+    """
     playlist_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     tracks = models.ManyToManyField(Track)

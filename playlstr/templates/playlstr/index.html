@@ -1,9 +1,28 @@
-{% if latest_playlist_list %}
-    <ul>
-    {% for playlist in latest_playlist_list %}
-        <li><a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No playlists are available.</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <title>playlstr</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div id="importPlaylist" class="h2 centered" style="padding: 50px;">
+        <a href="import/">Import playlist</a>
+    </div>
+    <div id="newestList">
+        {% if newest_playlist_list %}
+            <ul class="list-group">
+                <li class="nav-header list-group-item h2 centered" style="border: none;">Newest</li>
+                {% for playlist in newest_playlist_list %}
+                    <li class="list-group-item"><a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No playlists are available.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

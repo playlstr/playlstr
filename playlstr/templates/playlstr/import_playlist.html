@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+    <script src="{% static 'js/import.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Import Playlist</title>
+</head>
+<body>
+    <div id="importText" class="h1 centered" style="margin-top:50px; margin-bottom:50px;">
+        Import Playlist
+    </div>
+    <br><br><br>
+    <div id="spotifyImportContainer">
+        <div id="spotifyImport" class="input-group mb-3">
+            <span class="input-group-text" id="spotifyImportText">
+                Spotify
+            </span>
+            <input type="text" class="form-control" id="spotifyImportInput">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="parseSpotifyImport()">
+                Import
+            </button>
+        </div>
+        <div id="invalidSpotifyUrl" class="alert alert-danger hidden">Invalid URL</div>
+        <div id="spotifyImportRequestSent" class="centered hidden">
+            <div id="spotifyImportSpinner" class="spinner-border">
+            </div>
+            Importing...
+        </div>
+        <div id="spotifyImportFailed" class="alert alert-danger hidden">
+            Failed to import playlist
+        </div>
+    </div>
+</body>
+</html>

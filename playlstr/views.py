@@ -1,12 +1,12 @@
 from django.http import HttpResponse
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 
 from .models import *
+from .playlist_import import import_spotify
 
 
 def index(request):
-    latest_playlist_list = Playlist.objects.order_by('edit_date')
-    return render(request, 'playlstr/index.html', {'latest_playlist_list': latest_playlist_list})
+    return render(request, 'playlstr/index.html', {'newest_playlist_list': Playlist.objects.order_by('edit_date')})
 
 
 def playlist(request, playlist_id):
@@ -19,3 +19,11 @@ def track(request, track_id):
 
 def edit_playlist(request, playlist_id):
     return HttpResponse("Editing ".format(playlist_id))
+
+
+def import_playlist(request):
+    return render(request, 'playlstr/import_playlist.html')
+
+
+def spotify_import(request):
+    return HttpResponse(import_spotify(request.POST))

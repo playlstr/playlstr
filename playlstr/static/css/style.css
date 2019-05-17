@@ -1,0 +1,24 @@
+html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.importButtons {
+    margin: auto;
+}
+
+.centered {
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+    align-content: center;
+}
+
+.hidden{
+    display: none;
+}

@@ -1,6 +1,6 @@
 ## playlstr
 ### Development
 - Install Python and Postgresql
-- Install django and psycopg2 modules (probably using virtualenv)
+- `pip install -r requirements.txt`
 - Create database and update credentials in `playlstr/settings.py`
 - `python manage.py makemigrations playlstr` and `python manage.py migrate`
