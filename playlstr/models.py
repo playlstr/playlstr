@@ -1,4 +1,5 @@
 from django.db import models
+from sortedm2m.fields import SortedManyToManyField
 from datetime import datetime
 
 UNKNOWN_ALBUM = 'Unknown album'
@@ -19,6 +20,7 @@ class Track(models.Model):
     album_artist = models.CharField(max_length=255, default=None, blank=True, null=True)
     release_date = models.DateField(default=None, blank=True, null=True)
     image_url = models.CharField(max_length=512, default=None, blank=True, null=True)
+    duration_ms = models.IntegerField(default=None, blank=True, null=True)
     # External identifiers
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)
@@ -31,11 +33,12 @@ class Playlist(models.Model):
     """
     A playlist
     """
-    playlist_id = models.AutoField(primary_key=True)
+    playlist_id = models.AutoField(primary_key=True)  # Internal DB ID
     name = models.CharField(max_length=255)
-    tracks = models.ManyToManyField(Track)
+    tracks = SortedManyToManyField(Track)
     create_date = models.DateTimeField(default=datetime.now)
     edit_date = models.DateTimeField(default=datetime.now)
+    sublists = models.ManyToManyField("self")
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
     last_sync_spotify = models.DateTimeField(max_length=64, default=datetime.now)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)

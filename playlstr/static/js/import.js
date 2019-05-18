@@ -1,22 +1,21 @@
-function showSpotifyImport() {
-    $('#spotifyImportContainer').show();
+function deleteTrack(track_id) {
+
 }
 
-function parseSpotifyImport() {
-    url = document.getElementById('spotifyImportInput').value;
-    if (url.match('^http(s?):\\/\\/open\\.spotify\\.com\\/playlist\\/.{22}\\/?')) {
-        $('#invalidSpotifyUrl').hide();
-        importSpotifyUrl(url);
-    } else {
-        $('#invalidSpotifyUrl').show();
-    }
-}
 
-function importSpotifyUrl(import_url) {
+function importSpotifyUrl() {
     var location = window.location.toString();
     var access_token_start = location.indexOf('#access_token=') + 14;
-    if (access_token_start === 13) {
-        window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + location;
+    import_url = document.getElementById('spotifyImportInput').value;
+    if (access_token_start === 13 /* -1 + 14 */) {
+        window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + location + '&state=' + import_url;
+        return;
+    }
+    if (import_url.match('^http(s?):\\/\\/open\\.spotify\\.com\\/playlist\\/.{22}\\/?')) {
+        $('#invalidSpotifyUrl').hide();
+    } else {
+        $('#invalidSpotifyUrl').show();
+        return;
     }
     var access_token_end = location.indexOf('&', access_token_start);
     if (access_token_end === -1) access_token_end = location.length;

@@ -25,7 +25,7 @@
                 Spotify
             </span>
             <input type="text" class="form-control" id="spotifyImportInput">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="parseSpotifyImport()">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="importSpotifyUrl()">
                 Import
             </button>
         </div>
@@ -39,5 +39,21 @@
             Failed to import playlist
         </div>
     </div>
+    <script>
+        loc = window.location.toString();
+        console.log(loc);
+        start = loc.indexOf("state=") + 6;
+        if (start !== 5) {
+            end = loc.indexOf("&", start);
+            if (end === -1) {
+                end = loc.indexOf("?", start);
+                if (end === -1) {
+                    end = loc.length;
+                }
+            }
+            url = decodeURIComponent(loc.substring(start, end));
+            document.getElementById('spotifyImportInput').value = url;
+        }
+    </script>
 </body>
 </html>

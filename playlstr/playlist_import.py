@@ -12,12 +12,10 @@ def import_spotify(info):
         return 'Invalid URL'
     playlist_id = url[-23:0] if url[-1] == '/' else url[-22:]
     # Get playlist tracks
-    query_url = 'https://api.spotify.com/v1/playlists/' + playlist_id + '/tracks'
+    query_url = 'https://api.spotify.com/v1/playlists/' + playlist_id
     query_headers = {'Authorization': 'Bearer {}'.format(info['access_token'])}
-    tracks_json = get(query_url, headers=query_headers).json()
+    tracks_json = get(query_url + '/tracks', headers=query_headers).json()
     # TODO handle expired/invalid access token
-    # TODO query API again to get playlist name
-    playlist_name = 'Spotify Playlist'
     # Get list of tracks
     tracks = []
     while 'next' in tracks_json and tracks_json['next'] is not None:
@@ -30,30 +28,35 @@ def import_spotify(info):
                 pass
             track = Track.objects.filter(query).first()
             if track is None:
-                # Get track attributes
                 title = json['name']
-                try:
-                    artist = json['artists'][0]['name']
-                except KeyError:
-                    artist = UNKNOWN_ARTIST
-                try:
-                    album = json['album']['name']
-                except KeyError:
-                    album = UNKNOWN_ARTIST
                 try:
                     isrc = json['external_ids']['isrc']
                 except KeyError:
                     isrc = None
                 # Create new track
-                track = Track.objects.create(title=title, artist=artist, album=album, spotify_id=json['id'], isrc=isrc)
+                track = Track.objects.create(title=title)
             else:
                 # Ensure existing track has correct spotify id
                 track.spotify_id = json['id']
+            # Get track attributes
+            try:
+                track.artist = json['artists'][0]['name']
+            except KeyError:
+                pass
+            try:
+                track.album = json['album']['name']
+            except KeyError:
+                pass
+            try:
+                track.duration_ms = json['duration_ms']
+            except KeyError:
+                pass
             track.save()
             tracks.append(track)
         tracks_json = get(tracks_json['next'], headers=query_headers).json()
+    playlist_json = get(query_url, headers=query_headers).json()
     playlist = Playlist.objects.get_or_create(spotify_id=playlist_id)[0]
-    playlist.name = playlist_name
+    playlist.name = playlist_json['name']
     playlist.tracks.set(tracks)
     playlist.last_sync_spotify = datetime.now()
     playlist.save()
