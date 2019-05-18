@@ -17,7 +17,6 @@ Ordered approximately by expected implementation date (soonest first)
 - Local library support via standalone client or beets plugin
     - Use existing metadata for matching tracks when importing a local playlist file
     - Export playlists using local music files
-- Get recommendations for your playlist based on other playlists (This is fairly complex and probably won't be implemented any time soon. Using a latent factor model and formulating recommendations as a matrix completion problem, we need some user data to fill in enough of the matrix to be able to make good recommendations. Once we have enough data we can start to implement this, probably using alternating least squares).
 ### Development
 - Install Python 3.6+ and PostgreSQL 11.2+
 - `pip install -r requirements.txt`
