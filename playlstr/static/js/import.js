@@ -3,8 +3,7 @@ function showSpotifyImport() {
 }
 
 function parseSpotifyImport() {
-    //url = $('#spotifyImportInput').text();
-    url = "https://open.spotify.com/playlist/1vil9lNHzzlW3sWXfM13HY";
+    url = document.getElementById('spotifyImportInput').value;
     if (url.match('^http(s?):\\/\\/open\\.spotify\\.com\\/playlist\\/.{22}\\/?')) {
         $('#invalidSpotifyUrl').hide();
         importSpotifyUrl(url);
@@ -16,7 +15,7 @@ function parseSpotifyImport() {
 function importSpotifyUrl(import_url) {
     var location = window.location.toString();
     var access_token_start = location.indexOf('#access_token=') + 14;
-    if (access_token_start === -1 + 14) {
+    if (access_token_start === 13) {
         window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + location;
     }
     var access_token_end = location.indexOf('&', access_token_start);
@@ -44,6 +43,8 @@ function importSpotifyUrl(import_url) {
 }
 
 function spotifyImportComplete(data) {
+    url = 'http://' + window.location.host + '/list/' + data;
+    window.location = url;
 }
 
 function spotifyImportFail(data) {
