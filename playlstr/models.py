@@ -1,6 +1,7 @@
 from django.db import models
 from sortedm2m.fields import SortedManyToManyField
-from datetime import datetime
+from django.utils import timezone
+from django.contrib.auth.models import User
 
 UNKNOWN_ALBUM = 'Unknown album'
 UNKNOWN_ARTIST = 'Unknown artist'
@@ -34,11 +35,22 @@ class Playlist(models.Model):
     A playlist
     """
     playlist_id = models.AutoField(primary_key=True)  # Internal DB ID
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, default="Playlist {}".format(playlist_id))
     tracks = SortedManyToManyField(Track)
-    create_date = models.DateTimeField(default=datetime.now)
-    edit_date = models.DateTimeField(default=datetime.now)
+    create_date = models.DateTimeField(default=timezone.now)
+    edit_date = models.DateTimeField(default=timezone.now)
     sublists = models.ManyToManyField("self")
+    '''
+    privacy = models.SmallIntegerField(
+        choices=(
+            (0, "Public"),  # Shows up everywhere (search results, latest updates, etc.)
+            (1, "Unlisted"),  # Doesn't show up anywhere but viewable by anybody if you have the link
+            (2, "Private")  # Only shows up to owner/editors
+        ), default=0, null=False
+    )
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Creator of this playlist
+    editors = models.ManyToManyField(User)  # Users who can modify this playlist
+    '''
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
-    last_sync_spotify = models.DateTimeField(max_length=64, default=datetime.now)
+    last_sync_spotify = models.DateTimeField(max_length=64, default=timezone.now)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)

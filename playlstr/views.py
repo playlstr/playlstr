@@ -18,7 +18,7 @@ def track(request, track_id):
 
 
 def edit_playlist(request, playlist_id):
-    return HttpResponse("Editing ".format(playlist_id))
+    return render(request, 'playlstr/edit_playlist.html', {'playlist': Playlist.objects.get(playlist_id=playlist_id)})
 
 
 def import_playlist(request):

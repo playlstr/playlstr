@@ -6,6 +6,11 @@ from .models import *
 
 
 def import_spotify(info):
+    """
+    Import Spotify playlist and return playlist ID or cause of error if unsuccessful
+    :param info: dict where playlist_url is the url of the playlist and access_token is the Spotify access token
+    :return: playlist ID or cause of error if unsuccessful
+    """
     url = info['playlist_url']
     # Validate URL
     if not (isinstance(url, str) and match(r'^http(s?)://open\.spotify\.com/playlist/.{22}/?', url)):
@@ -14,8 +19,14 @@ def import_spotify(info):
     # Get playlist tracks
     query_url = 'https://api.spotify.com/v1/playlists/' + playlist_id
     query_headers = {'Authorization': 'Bearer {}'.format(info['access_token'])}
-    tracks_json = get(query_url + '/tracks', headers=query_headers).json()
-    # TODO handle expired/invalid access token
+    tracks_response = get(query_url + '/tracks', headers=query_headers)
+    if tracks_response.status_code != 200:
+        return tracks_response.reason
+    tracks_json = tracks_response.json()
+    try:
+        return "Error: " + tracks_json['error_description']
+    except KeyError:
+        pass
     # Get list of tracks
     tracks = []
     while 'next' in tracks_json and tracks_json['next'] is not None:
@@ -58,6 +69,6 @@ def import_spotify(info):
     playlist = Playlist.objects.get_or_create(spotify_id=playlist_id)[0]
     playlist.name = playlist_json['name']
     playlist.tracks.set(tracks)
-    playlist.last_sync_spotify = datetime.now()
+    playlist.last_sync_spotify = timezone.now()
     playlist.save()
     return playlist.playlist_id

@@ -19,6 +19,11 @@ body {
     align-content: center;
 }
 
-.hidden{
+.hidden {
     display: none;
+}
+
+.vmargin-sm {
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
