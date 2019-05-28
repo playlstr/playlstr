@@ -29,6 +29,7 @@ class SpotifyImportPublicTestCase(TestCase):
         # Imported playlist's id
         self.pid = import_spotify(
             {'playlist_url': SPOTIFY_TEST_PLAYLIST_PUBLIC_URL, 'access_token': VALID_SPOTIFY_ACCESS_TOKEN})
+        self.assertIsInstance(self.pid, int, 'Created valid playlist id')
         self.assertGreaterEqual(self.pid, 0, 'Created valid playlist id')
         self.playlist = Playlist.objects.get(playlist_id=self.pid)
         self.assertIsInstance(self.playlist, Playlist, "Only one playlist with playlist ID")

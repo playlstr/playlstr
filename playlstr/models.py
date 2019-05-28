@@ -40,7 +40,6 @@ class Playlist(models.Model):
     create_date = models.DateTimeField(default=timezone.now)
     edit_date = models.DateTimeField(default=timezone.now)
     sublists = models.ManyToManyField("self")
-    '''
     privacy = models.SmallIntegerField(
         choices=(
             (0, "Public"),  # Shows up everywhere (search results, latest updates, etc.)
@@ -48,9 +47,9 @@ class Playlist(models.Model):
             (2, "Private")  # Only shows up to owner/editors
         ), default=0, null=False
     )
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Creator of this playlist
-    editors = models.ManyToManyField(User)  # Users who can modify this playlist
-    '''
+    # Creator of this playlist
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='owner')
+    editors = models.ManyToManyField(User, related_name='editors')  # Users who can modify this playlist
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
     last_sync_spotify = models.DateTimeField(max_length=64, default=timezone.now)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)

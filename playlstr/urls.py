@@ -26,4 +26,5 @@ urlpatterns = [
     path('edit/<int:playlist_id>/', views.edit_playlist, name='edit'),
     path('import/', views.import_playlist, name='import'),
     path('import/spotify/', views.spotify_import, name='spotify_import'),
+    path('create/', views.create_playlist, name='playlist_create'),
 ]

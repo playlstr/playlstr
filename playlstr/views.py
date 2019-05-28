@@ -6,7 +6,7 @@ from .playlist_import import import_spotify
 
 
 def index(request):
-    return render(request, 'playlstr/index.html', {'newest_playlist_list': Playlist.objects.order_by('edit_date')})
+    return render(request, 'playlstr/index.html', {'newest_playlist_list': Playlist.objects.order_by('-edit_date')})
 
 
 def playlist(request, playlist_id):
@@ -27,3 +27,13 @@ def import_playlist(request):
 
 def spotify_import(request):
     return HttpResponse(import_spotify(request.POST))
+
+
+def create_playlist(request):
+    name = request.POST['name']
+    new_list = Playlist.objects.create()
+    if len(name) > 0:
+        new_list.name = name
+    new_list.save()
+    return HttpResponse(new_list.playlist_id)
+
