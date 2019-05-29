@@ -29,6 +29,9 @@ class Track(models.Model):
     isrc = models.CharField(max_length=24, default=None, null=True, blank=True)
     mb_id = models.CharField(max_length=36, default=None, null=True, blank=True)
 
+    def __str__(self):
+        return "{} - {}".format(self.artist, self.title)
+
 
 class Playlist(models.Model):
     """
@@ -53,3 +56,4 @@ class Playlist(models.Model):
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
     last_sync_spotify = models.DateTimeField(max_length=64, default=timezone.now)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)
+

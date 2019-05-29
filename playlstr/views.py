@@ -1,5 +1,7 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.db.models import Q
+import json
 
 from .models import *
 from .playlist_import import import_spotify
@@ -15,10 +17,6 @@ def playlist(request, playlist_id):
 
 def track(request, track_id):
     return render(request, 'playlstr/track.html', {'track': Track.objects.get(track_id=track_id)})
-
-
-def edit_playlist(request, playlist_id):
-    return render(request, 'playlstr/edit_playlist.html', {'playlist': Playlist.objects.get(playlist_id=playlist_id)})
 
 
 def import_playlist(request):
@@ -37,3 +35,32 @@ def create_playlist(request):
     new_list.save()
     return HttpResponse(new_list.playlist_id)
 
+
+def track_autocomplete(request):
+    if not request.is_ajax():
+        return HttpResponse("Invalid")
+    try:
+        term = request.POST['term']
+    except KeyError:
+        return HttpResponse('None')
+    try:
+        start = int(request.POST['start'])
+    except (KeyError, ValueError):
+        start = 0
+    try:
+        results_count = int(request.POST['count'])
+    except (KeyError, ValueError):
+        results_count = 25
+    '''
+    query_set = Track.objects.filter(Q(title__icontains=term) | Q(artist__icontains=term) | Q(album__icontains=term))[
+                start:start + results_count]
+    '''
+    print(term)
+    query_set = Track.objects.filter(title__icontains=term)[start: start + results_count]
+    values = [{
+        'id': r.track_id,
+        'title': r.title,
+        'artist': r.artist,
+        'album': r.album
+    } for r in query_set]
+    return JsonResponse(json.dumps(values), safe=False)

@@ -31,3 +31,14 @@ body {
 .padding-sm {
     padding: 20px;
 }
+
+.rm-btn-container {
+    display: none;
+}
+
+.search-results-table {
+    height: 300px;
+    width: 100%;
+    overflow: auto;
+}
+

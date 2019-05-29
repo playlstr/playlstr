@@ -26,8 +26,6 @@ function importSpotifyUrl() {
     var csrf_cookie_end = document.cookie.indexOf(';', csrf_cookie_start);
     if (csrf_cookie_end === -1) csrf_cookie_end = document.cookie.length;
     var csrf = unescape(document.cookie.substring(csrf_cookie_start, csrf_cookie_end));
-    console.log(csrf);
-    console.log(location.substring(0, location.indexOf('/import/') + 8) + 'spotify/');
     $.ajax({
         type: 'POST',
         url: location.substring(0, location.indexOf('/import/') + 8) + 'spotify/',
