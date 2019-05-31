@@ -1,21 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'playlstr/base.html' %}
 {% load static %}
-<head>
-    <title>playlstr</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block head %}
+    <title>Import</title>
     <script src="{% static 'js/index.js' %}"></script>
-</head>
-<body>
+{% endblock %}
+{% block content %}
     <div id="importPlaylist" class="h2 centered padding-sm">
         <a href="import/">Import playlist</a>
     </div>
@@ -44,7 +33,7 @@
             </div>
         </div>
     </div>
-    <div id="newestList">
+    <div id="newestList" class="centered">
         {% if newest_playlist_list %}
             <ul class="list-group">
                 <li class="nav-header list-group-item h2 centered" style="border: none;">Recently Updated</li>
@@ -56,5 +45,4 @@
             <p>No playlists are available.</p>
         {% endif %}
     </div>
-</body>
-</html>
+{% endblock %}

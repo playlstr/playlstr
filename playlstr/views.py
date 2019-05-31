@@ -55,7 +55,6 @@ def track_autocomplete(request):
     query_set = Track.objects.filter(Q(title__icontains=term) | Q(artist__icontains=term) | Q(album__icontains=term))[
                 start:start + results_count]
     '''
-    print(term)
     query_set = Track.objects.filter(title__icontains=term)[start: start + results_count]
     values = [{
         'id': r.track_id,

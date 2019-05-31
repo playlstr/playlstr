@@ -1,23 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'playlstr/base.html' %}
 {% load static %}
+{% block head %}
+    <title>Playlist</title>
+    <script src="{% static 'js/playlist.js' %}"></script>
+{% endblock %}
+{% block content %}
 {% if playlist %}
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <link rel="stylesheet"
-              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-              integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-              crossorigin="anonymous"/>
-        <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
-        <script src="{% static 'js/playlist.js' %}"></script>
-        <title>{{ playlist.name }}</title>
-    </head>
-    <body>
     <script>
         $(document).ready(function () {
             initTrackAutocomplete();
@@ -26,7 +14,6 @@
     <div id="playlist" class="container-fluid">
         <h1 style="padding: 50px;" class="text-center">{{ playlist.name }}</h1>
         <div id="editContainer" class="container vmargin-sm">
-            <form>
                 <div id="editControlButtons" class="" style="width: 1000px;">
                     <button type="button" class="btn btn-primary form-btn" id="editButton" onclick="enterEditMode()">
                         Edit
@@ -86,7 +73,6 @@
                         </table>
                     </div>
                 </div>
-            </form>
         </div>
         <div id="trackList">
             <table class="table table-bordered pagin-table">
@@ -122,10 +108,8 @@
 
         </div>
     </div>
-    <script type="text/javascript">$('tbody').sortable();</script>
-    </body>
 {% else %}
     Invalid playlist
 {% endif %}
-</html>
+{% endblock %}
 
