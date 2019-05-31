@@ -4,7 +4,7 @@ from django.db.models import Q
 import json
 
 from .models import *
-from .playlist_import import import_spotify
+from .playlist_utils import *
 
 
 def index(request):
@@ -12,7 +12,10 @@ def index(request):
 
 
 def playlist(request, playlist_id):
-    return render(request, 'playlstr/playlist.html', {'playlist': Playlist.objects.get(playlist_id=playlist_id)})
+    return render(request, 'playlstr/playlist.html', {'playlist': Playlist.objects.get(playlist_id=playlist_id),
+                                                      'tracks': [pt.track for pt in
+                                                                 PlaylistTrack.objects.filter(playlist_id=playlist_id)]
+                                                      })
 
 
 def track(request, track_id):
@@ -63,3 +66,9 @@ def track_autocomplete(request):
         'album': r.album
     } for r in query_set]
     return JsonResponse(json.dumps(values), safe=False)
+
+
+def playlist_update(request):
+    if not request.is_ajax():
+        return HttpResponse("Invalid")
+    return HttpResponse(update_playlist(request.POST))

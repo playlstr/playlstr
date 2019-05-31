@@ -1,3 +1,2 @@
 django
 psycopg2
-git+git://github.com/peopledoc/django-sortedm2m@fix-compat-dj22

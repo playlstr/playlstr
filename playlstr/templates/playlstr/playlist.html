@@ -5,15 +5,16 @@
     <script src="{% static 'js/playlist.js' %}"></script>
 {% endblock %}
 {% block content %}
-{% if playlist %}
-    <script>
-        $(document).ready(function () {
-            initTrackAutocomplete();
-        });
-    </script>
-    <div id="playlist" class="container-fluid">
-        <h1 style="padding: 50px;" class="text-center">{{ playlist.name }}</h1>
-        <div id="editContainer" class="container vmargin-sm">
+    {% if playlist %}
+        <script>
+            let playlist_id = {{ playlist.playlist_id }};
+            $(document).ready(function () {
+                initTrackAutocomplete();
+            });
+        </script>
+        <div id="playlist" class="container-fluid">
+            <h1 style="padding: 50px;" class="text-center" id="playlistName">{{ playlist.name }}</h1>
+            <div id="editContainer" class="container vmargin-sm">
                 <div id="editControlButtons" class="" style="width: 1000px;">
                     <button type="button" class="btn btn-primary form-btn" id="editButton" onclick="enterEditMode()">
                         Edit
@@ -25,20 +26,23 @@
                             onclick="exitEditMode(false)">Cancel
                     </button>
                 </div>
+                <div id="trackSearchTitle" class="big-text" style="display: none; margin-top: 10px;">
+                    Add Tracks
+                    <button id="enableTrackSearch" type="button" class="btn btn-primary" onclick="toggleTrackSearch()">+</button>
+                </div>
                 <div id="addTrackContainer" style="display:none;">
                     <div id="trackSearchHeader" class="form-row">
                         <div>
-                            <div class="h4" style="display: inline-block; width: 200px;">Track Search</div>
-                            <div style="display: inline-block; width: 150px;">
-                                <button type="button" class="btn btn-secondary" onclick="toggleAdvancedTrackSearch()" style="margin-top: 20px; margin-bottom: 20px;">
-                                    Advanced
-                                </button>
-                            </div>
-                            <div style="display: inline-block; width: 200px;">
-                                Don't see what you're looking for?
-                                <button type="button" class="btn btn-secondary" onclick="getSpotifyResults()" style="margin-top: 20px; margin-bottom: 20px;">
-                                    Search Spotify
-                                </button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleAdvancedTrackSearch()"
+                                    style="margin-top: 20px; margin-bottom: 20px;">
+                                Advanced
+                            </button>
+                            <button id="searchSpotifyButton" type="button" class="btn btn-secondary" onclick="getSpotifyResults()"
+                                    style="margin-top: 20px; margin-bottom: 20px;">
+                                Search Spotify
+                            </button>
+                            <div style="display: inline-block; color: green; margin-left: 20px;" id="addSuccessDialog">
+                                Added!
                             </div>
                         </div>
                     </div>
@@ -63,53 +67,53 @@
                             </tr>
                             </thead>
                             <tbody id="trackSearchResultsTBody">
-                                <tr>
-                                    <td>No known tracks</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+                            <tr>
+                                <td>No known tracks</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-        </div>
-        <div id="trackList">
-            <table class="table table-bordered pagin-table">
-                <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Artist</th>
-                    <th>Album</th>
-                    <th>Listen</th>
-                    <th class="rm-btn-container" style="display: none;">Remove</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for track in playlist.tracks.all %}
+            </div>
+            <div id="trackList">
+                <table class="table table-bordered pagin-table">
+                    <thead>
                     <tr>
-                        <td><a href="/track/{{ track.track_id }}">{{ track.title }}</a></td>
-                        <td>{{ track.artist }}</td>
-                        <td>{{ track.album }}</td>
-                        <td>
-                            <button type="button" class="btn" style="border: 1px solid black;">
-                                &#9654; Play
-                            </button>
-                        </td>
-                        <td class="rm-btn-container" style="display: none;">
-                            <button type="button" class="btn" style="border: 1px solid red;"
-                                    onclick="deleteTrack({{ track.track_id }}">&#10060;
-                            </button>
-                        </td>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>Album</th>
+                        <th>Listen</th>
+                        <th class="rm-btn-container" style="display: none;">Remove</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="trackListTBody">
+                    {% for track in tracks %}
+                        <tr>
+                            <td><a href="/track/{{ track.track_id }}">{{ track.title }}</a></td>
+                            <td>{{ track.artist }}</td>
+                            <td>{{ track.album }}</td>
+                            <td>
+                                <button type="button" class="btn" style="border: 1px solid black;">
+                                    &#9654; Play
+                                </button>
+                            </td>
+                            <td class="rm-btn-container" style="display: none;">
+                                <button type="button" class="btn" style="border: 1px solid red;"
+                                        onclick="deleteTrack(;{{ track.track_id }}">&#10060;
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
 
+            </div>
         </div>
-    </div>
-{% else %}
-    Invalid playlist
-{% endif %}
+    {% else %}
+        Invalid playlist
+    {% endif %}
 {% endblock %}
 

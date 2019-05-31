@@ -42,3 +42,10 @@ body {
     overflow: auto;
 }
 
+.editable-title {
+    border: dotted lightslategrey;
+}
+
+.big-text {
+    font-size: 16pt;
+}

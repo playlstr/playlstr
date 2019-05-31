@@ -2,6 +2,7 @@ from django.db import models
 from sortedm2m.fields import SortedManyToManyField
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 
 UNKNOWN_ALBUM = 'Unknown album'
 UNKNOWN_ARTIST = 'Unknown artist'
@@ -33,16 +34,17 @@ class Track(models.Model):
         return "{} - {}".format(self.artist, self.title)
 
 
+
+
 class Playlist(models.Model):
     """
     A playlist
     """
     playlist_id = models.AutoField(primary_key=True)  # Internal DB ID
     name = models.CharField(max_length=255, default="Playlist {}".format(playlist_id))
-    tracks = SortedManyToManyField(Track)
     create_date = models.DateTimeField(default=timezone.now)
     edit_date = models.DateTimeField(default=timezone.now)
-    sublists = models.ManyToManyField("self")
+    sublists = models.ManyToManyField("self", blank=True)
     privacy = models.SmallIntegerField(
         choices=(
             (0, "Public"),  # Shows up everywhere (search results, latest updates, etc.)
@@ -52,8 +54,22 @@ class Playlist(models.Model):
     )
     # Creator of this playlist
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='owner')
-    editors = models.ManyToManyField(User, related_name='editors')  # Users who can modify this playlist
+    editors = models.ManyToManyField(User, related_name='editors', blank=True)  # Users who can modify this playlist
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
     last_sync_spotify = models.DateTimeField(max_length=64, default=timezone.now)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)
 
+
+class PlaylistTrack(models.Model):
+    """
+    A track within a playlist
+    """
+    pt_id = models.AutoField(primary_key=True)
+    track = models.ForeignKey(Track, null=False, blank=False, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, null=False, blank=False, on_delete=models.CASCADE)
+    index = models.PositiveIntegerField(null=False, blank=False)  # Index within playlist
+    added_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    add_date = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['index']

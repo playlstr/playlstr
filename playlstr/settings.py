@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sortedm2m',
     'playlstr',
 ]
 
@@ -78,9 +77,9 @@ WSGI_APPLICATION = 'playlstr.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'playlst',
-        'USER': 'playlstuser',
-        'PASSWORD': 'playlst',
+        'NAME': 'playlstr',
+        'USER': 'playlstruser',
+        'PASSWORD': 'playlstrpassword',
         'HOST': 'localhost',
         'PORT': '',
     }
