@@ -41,6 +41,9 @@
                                     style="margin-top: 20px; margin-bottom: 20px;">
                                 Search Spotify
                             </button>
+                            <button id="manualAddButton" type="button" class="btn btn-secondary" onclick="showNewTrackDialog()">
+                                Add Track Manually
+                            </button>
                             <div style="display: inline-block; color: green; margin-left: 20px;" id="addSuccessDialog">
                                 Added!
                             </div>
@@ -68,7 +71,7 @@
                             </thead>
                             <tbody id="trackSearchResultsTBody">
                             <tr>
-                                <td>No known tracks</td>
+                                <td>No matching tracks</td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -91,7 +94,7 @@
                     </thead>
                     <tbody id="trackListTBody">
                     {% for track in tracks %}
-                        <tr>
+                        <tr id="{{ track.track_id }}track">
                             <td><a href="/track/{{ track.track_id }}">{{ track.title }}</a></td>
                             <td>{{ track.artist }}</td>
                             <td>{{ track.album }}</td>
@@ -102,7 +105,7 @@
                             </td>
                             <td class="rm-btn-container" style="display: none;">
                                 <button type="button" class="btn" style="border: 1px solid red;"
-                                        onclick="deleteTrack(;{{ track.track_id }}">&#10060;
+                                        onclick="deleteTrack({{ track.track_id }})">&#10060;
                                 </button>
                             </td>
                         </tr>

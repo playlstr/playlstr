@@ -103,7 +103,6 @@ def update_playlist(data):
     except KeyError:
         pass
     else:
-        print(new_name)
         if new_name != playlist.name:
             playlist.name = new_name
             playlist.save()

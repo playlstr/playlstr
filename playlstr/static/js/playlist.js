@@ -1,10 +1,12 @@
 let newTracks = [];
+let spotifyResults = [];
 let deletedTracks = [];
 let advancedSearch = false;
 let trackSearch = false;
 let lastTrackSearchTime = new Date();
+let spotifyAccessToken = ''; // TODO load from cookie
 
-String.prototype.format = String.prototype.f = function() {
+String.prototype.format = String.prototype.f = function () {
     var s = this,
         i = arguments.length;
 
@@ -15,8 +17,8 @@ String.prototype.format = String.prototype.f = function() {
 };
 
 function deleteTrack(track_id) {
-    // TODO
-    console.log("delete " + track_id);
+    deletedTracks.push(track_id);
+    $("#" + track_id + "track").hide();
 }
 
 function enterEditMode() {
@@ -47,7 +49,12 @@ function exitEditMode(save = false) {
             type: 'POST',
             url: 'http://' + window.location.host + '/playlist-update/',
             headers: {'X-CSRFToken': csrf},
-            data: {'playlist': playlist_id, 'added': JSON.stringify(newTracks), 'deleted': JSON.stringify(deletedTracks), 'playlist_name': $('#playlistName').text()},
+            data: {
+                'playlist': playlist_id,
+                'added': JSON.stringify(newTracks),
+                'removed': JSON.stringify(deletedTracks),
+                'playlist_name': $('#playlistName').text()
+            },
             success: showUpdateSuccess,
             error: showUpdateFailure
         });
@@ -90,7 +97,7 @@ function appendSearchResults(unparsed_results, search_results_div) {
     let results = JSON.parse(unparsed_results);
     for (let i = 0; i < results.length; i++) {
         let track = results[i];
-        let new_row = '<tr class="track-search-results" id="{0}"><td>{1}</td><td>{2}</td><td>{3}</td><td><button class="btn btn-primary" onclick="addTrack({0}, \'{1}\', \'{2}\', \'{3}\')">+</button></td></tr>'.format(
+        let new_row = '<tr class="track-search-results" id="{0}search"><td>{1}</td><td>{2}</td><td>{3}</td><td><button class="btn btn-primary" onclick="addTrack({0}, \'{1}\', \'{2}\', \'{3}\')">+</button></td></tr>'.format(
             track.id, track.title, track.artist, track.album);
         $(search_results_div).append(new_row);
     }
@@ -130,7 +137,32 @@ function getTrackResultsFail() {
 }
 
 function getSpotifyResults() {
-    // TODO
+    let query = advancedSearch ? null : $('#simpleTrackSearchText').val();
+    $.ajax({
+        type: 'GET',
+        url: 'https://api.spotify.com/v1/search',
+        headers: {'Authorization': 'Bearer ' + spotifyAccessToken},
+        data: {'q': query, 'type': 'track,artist,album', 'include_external': 'audio'},
+        success: function (data) {
+            let table_body = $('#trackSearchResultsTBody');
+            table_body.empty();
+            appendSpotifySearchResults(advancedSearch ? null : data['tracks']['items'], table_body);
+        },
+        error: function () {
+            getTrackResultsFail();
+        }
+    });
+
+}
+
+function appendSpotifySearchResults(tracks, table_body) {
+    for (let i = 0; i < tracks.length; i++) {
+        spotifyResults.push(tracks[i]);
+        let track = tracks[i];
+        let new_row = '<tr class="track-search-results" id="{0}search"><td>{1}</td><td>{2}</td><td>{3}</td><td><button class="btn btn-primary" onclick="addSpotifyTrack({0}, \'{1}\', \'{2}\', \'{3}\')">+</button></td></tr>'.format(
+            track.id, track.name, track.artists[0].name, track.album.name);
+        $(table_body).append(new_row);
+    }
 }
 
 function toggleTrackSearch() {
@@ -143,4 +175,12 @@ function toggleTrackSearch() {
         $('#enableTrackSearch').text('-');
         trackSearch = true;
     }
+}
+
+function addSpotifyTrack(spotify_id) {
+
+}
+
+function showNewTrackDialog() {
+    // TODO
 }

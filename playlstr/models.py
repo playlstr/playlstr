@@ -13,7 +13,7 @@ class Track(models.Model):
     A single track
     """
     # Fundamental track info
-    track_id = models.AutoField(primary_key=True)  # Internal DB ID
+    track_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, null=False)
     album = models.CharField(max_length=255, default=UNKNOWN_ALBUM)
     artist = models.CharField(max_length=255, default=UNKNOWN_ARTIST)
@@ -24,23 +24,21 @@ class Track(models.Model):
     image_url = models.CharField(max_length=512, default=None, blank=True, null=True)
     duration_ms = models.IntegerField(default=None, blank=True, null=True)
     # External identifiers
-    spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)
-    gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)
-    deezer_id = models.CharField(max_length=64, default=None, null=True, blank=True)
-    isrc = models.CharField(max_length=24, default=None, null=True, blank=True)
-    mb_id = models.CharField(max_length=36, default=None, null=True, blank=True)
+    spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=True)
+    gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=True)
+    deezer_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=True)
+    isrc = models.CharField(max_length=24, default=None, null=True, blank=True, unique=True)
+    mb_id = models.CharField(max_length=36, default=None, null=True, blank=True, unique=True)
 
     def __str__(self):
         return "{} - {}".format(self.artist, self.title)
-
-
 
 
 class Playlist(models.Model):
     """
     A playlist
     """
-    playlist_id = models.AutoField(primary_key=True)  # Internal DB ID
+    playlist_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, default="Playlist {}".format(playlist_id))
     create_date = models.DateTimeField(default=timezone.now)
     edit_date = models.DateTimeField(default=timezone.now)
@@ -73,3 +71,7 @@ class PlaylistTrack(models.Model):
 
     class Meta:
         ordering = ['index']
+        constraints = [
+            models.UniqueConstraint(fields=['track', 'playlist'], name='unique playlist+track'),
+            models.UniqueConstraint(fields=['playlist', 'index'], name='unique track index'),
+        ]
