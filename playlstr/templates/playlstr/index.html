@@ -3,6 +3,7 @@
 {% block head %}
     <title>Import</title>
     <script src="{% static 'js/index.js' %}"></script>
+    <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
 {% endblock %}
 {% block content %}
     <div id="importPlaylist" class="h2 centered padding-sm">

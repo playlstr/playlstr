@@ -3,13 +3,14 @@
 {% block head %}
     <title>Import</title>
     <script src="{% static 'js/import.js' %}"></script>
+    <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken()"></script>
 {% endblock %}
 {% block content %}
     <div id="importText" class="h1 centered vmargin-sm">
         Import Playlist
     </div>
     <br><br><br>
-    <div id="spotifyImportContainer">
+    <div id="spotifyImportContainer" class="centered">
         <div id="spotifyImport" class="input-group mb-3">
             <span class="input-group-text" id="spotifyImportText">
                 Spotify
@@ -31,7 +32,6 @@
     </div>
     <script>
         loc = window.location.toString();
-        console.log(loc);
         start = loc.indexOf("state=") + 6;
         if (start !== 5) {
             end = loc.indexOf("&", start);

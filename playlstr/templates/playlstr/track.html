@@ -1,7 +1,7 @@
 {% extends 'playlstr/base.html' %}
 {% load static %}
-{% block head %}
-    <title>{{ track.title }}</title>
+{% block title %}
+    {{ track.title }}
 {% endblock %}
 {% block content %}
     {{ track.artist }} - {{track.title }}

@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 
+import json
+
 UNKNOWN_ALBUM = 'Unknown album'
 UNKNOWN_ARTIST = 'Unknown artist'
 

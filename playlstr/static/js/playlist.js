@@ -1,10 +1,10 @@
 let newTracks = [];
 let spotifyResults = [];
 let deletedTracks = [];
+let newSpotifyTracks = [];
 let advancedSearch = false;
 let trackSearch = false;
 let lastTrackSearchTime = new Date();
-let spotifyAccessToken = ''; // TODO load from cookie
 
 String.prototype.format = String.prototype.f = function () {
     var s = this,
@@ -28,6 +28,8 @@ function enterEditMode() {
     $('.rm-btn-container').show();
     $('#playlistName').attr('contenteditable', true).addClass('editable-title');
     $('#trackSearchTitle').show();
+    // TODO move this to when load from spotify button is pressed and add option to save/remove existing changes first
+    if (spotifyAccessToken === null) newSpotifyAccessToken();
 }
 
 function exitEditMode(save = false) {
@@ -41,18 +43,16 @@ function exitEditMode(save = false) {
     $('.rm-btn-container').hide();
     if (save) {
         if (document.cookie.length === 0) return;
-        let csrf_cookie_start = document.cookie.indexOf('csrftoken=') + 10;
-        let csrf_cookie_end = document.cookie.indexOf(';', csrf_cookie_start);
-        if (csrf_cookie_end === -1) csrf_cookie_end = document.cookie.length;
-        let csrf = unescape(document.cookie.substring(csrf_cookie_start, csrf_cookie_end));
         $.ajax({
             type: 'POST',
             url: 'http://' + window.location.host + '/playlist-update/',
-            headers: {'X-CSRFToken': csrf},
+            headers: {'X-CSRFToken': csrfToken},
             data: {
                 'playlist': playlist_id,
                 'added': JSON.stringify(newTracks),
                 'removed': JSON.stringify(deletedTracks),
+                'spotify_new': JSON.stringify(newSpotifyTracks),
+                'spotify_token': spotifyAccessToken,
                 'playlist_name': $('#playlistName').text()
             },
             success: showUpdateSuccess,
@@ -72,15 +72,10 @@ function initTrackAutocomplete() {
 }
 
 function getTrackSearchResults(term, start = 0, count = 0) {
-    if (document.cookie.length === 0) return;
-    let csrf_cookie_start = document.cookie.indexOf('csrftoken=') + 10;
-    let csrf_cookie_end = document.cookie.indexOf(';', csrf_cookie_start);
-    if (csrf_cookie_end === -1) csrf_cookie_end = document.cookie.length;
-    let csrf = unescape(document.cookie.substring(csrf_cookie_start, csrf_cookie_end));
     $.ajax({
         type: 'POST',
         url: 'http://' + window.location.host + '/track-autocomplete/',
-        headers: {'X-CSRFToken': csrf},
+        headers: {'X-CSRFToken': csrfToken},
         data: {'term': term},
         success: function (unparsed) {
             let table_body = $('#trackSearchResultsTBody');
@@ -109,7 +104,12 @@ function addTrack(track_id, title, artist, album) {
     $('#simpleTrackSearchText').focus();
     $('#trackListTBody').append('<tr><td><a href="/track/{0}">{1}</a></td><td>{2}</td><td>{3}</td><td><button type="button" class="btn" style="border: 1px solid black;">&#9654; Play</button></td><td class="rm-btn-container" style="display: block;"><button type="button" class="btn" style="border: 1px solid red;" onclick="deleteTrack({0})">&#10060;</button></td></tr>'.format(
         track_id, title, artist, album));
+    showAddSuccess();
+}
+
+function showAddSuccess() {
     $('#addSuccessDialog').fadeIn(1000).fadeOut(1000);
+
 }
 
 function toggleAdvancedTrackSearch() {
@@ -178,7 +178,8 @@ function toggleTrackSearch() {
 }
 
 function addSpotifyTrack(spotify_id) {
-
+    newSpotifyTracks.push(spotify_id);
+    showAddSuccess();
 }
 
 function showNewTrackDialog() {

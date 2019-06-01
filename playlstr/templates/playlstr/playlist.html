@@ -3,6 +3,7 @@
 {% block head %}
     <title>Playlist</title>
     <script src="{% static 'js/playlist.js' %}"></script>
+    <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
 {% endblock %}
 {% block content %}
     {% if playlist %}

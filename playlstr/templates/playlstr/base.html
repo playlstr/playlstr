@@ -13,10 +13,16 @@
               integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
               crossorigin="anonymous"/>
         <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+        <title>{% block title %}{% endblock %}</title>
         {% block head %}
         {% endblock %}
+        <script type="text/javascript">
+        let csrfToken = '{{ csrf_token }}';
+        </script>
 </head>
 <body>
+    {% block content-header %}
+    {% endblock %}
     <div class="content container">
         <div class="row">
             {% block content %}
