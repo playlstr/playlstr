@@ -3,7 +3,6 @@ from sortedm2m.fields import SortedManyToManyField
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
-
 import json
 
 UNKNOWN_ALBUM = 'Unknown album'
@@ -33,7 +32,7 @@ class Track(models.Model):
     mb_id = models.CharField(max_length=36, default=None, null=True, blank=True, unique=True)
 
     def __str__(self):
-        return "{} - {}".format(self.artist, self.title)
+        return "({}) {} - {}".format(self.track_id, self.artist, self.title)
 
 
 class Playlist(models.Model):
