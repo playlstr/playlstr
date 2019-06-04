@@ -1,8 +1,10 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
 import json
 
 from .models import *
+from .settings import LOGOUT_REDIRECT_URL
 from .playlist_utils import *
 from .spotify_utils import *
 from .track_utils import *
@@ -73,3 +75,7 @@ def playlist_update(request):
     if not request.is_ajax():
         return HttpResponse("Invalid")
     return HttpResponse(update_playlist(request.POST))
+
+def logout_view(request):
+    logout(request)
+    return redirect(LOGOUT_REDIRECT_URL)

@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
 
 from . import views
 
@@ -27,5 +28,7 @@ urlpatterns = [
     path('import/spotify/', views.spotify_import, name='spotify_import'),
     path('create/', views.create_playlist, name='playlist_create'),
     path('track-autocomplete/', views.track_autocomplete, name='track_autocomplete'),
-    path('playlist-update/', views.playlist_update, name='playlist_update')
+    path('playlist-update/', views.playlist_update, name='playlist_update'),
+    path('', include('social_django.urls', namespace='social')),
+    path('logout/', views.logout_view, name='logout')
 ]

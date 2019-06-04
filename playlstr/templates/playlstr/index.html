@@ -6,6 +6,15 @@
     <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
 {% endblock %}
 {% block content %}
+    {% if user.is_authenticated %}
+        <div id="logoutDiv" class="centered">
+        <a class="btn btn-primary" href="{% url 'logout' %}">Logout</a>
+        </div>
+    {% else %}
+        <div id="loginDiv" class="centered">
+            <a class="btn btn-primary" href="{% url 'social:begin' 'google-oauth2' %}">Login</a>
+        </div>
+    {% endif %}
     <div id="importPlaylist" class="h2 centered padding-sm">
         <a href="import/">Import playlist</a>
     </div>
