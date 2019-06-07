@@ -28,8 +28,6 @@ function enterEditMode() {
     $('.rm-btn-container').show();
     $('#playlistName').attr('contenteditable', true).addClass('editable-title');
     $('#trackSearchTitle').show();
-    // TODO move this to when load from spotify button is pressed and add option to save/remove existing changes first
-    if (spotifyAccessToken === null) newSpotifyAccessToken();
 }
 
 function exitEditMode(save = false) {

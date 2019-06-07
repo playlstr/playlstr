@@ -1,6 +1,7 @@
+from django.core.exceptions import ObjectDoesNotExist
+
 from .spotify_utils import *
 from .track_utils import *
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def update_playlist(data):

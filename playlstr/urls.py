@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
 
 from . import views
 
@@ -30,5 +29,7 @@ urlpatterns = [
     path('track-autocomplete/', views.track_autocomplete, name='track_autocomplete'),
     path('playlist-update/', views.playlist_update, name='playlist_update'),
     path('', include('social_django.urls', namespace='social')),
-    path('logout/', views.logout_view, name='logout')
+    path('logout/', views.logout_view, name='logout'),
+    path('get-spotify-token/', views.get_spotify_token, name='get_spotify_token'),
+    path('spotify-auth-user/', views.spotify_auth_user, name='spotify_auth_user')
 ]

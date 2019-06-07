@@ -9,7 +9,7 @@ function createPlaylist() {
         headers: {'X-CSRFToken': csrfToken},
         cache: false,
         timeout: 30000,
-        data: {'name' : playlistName},
+        data: {'name': playlistName},
         error: createPlaylistFail,
         success: createPlaylistSuccess,
         dataType: 'text'

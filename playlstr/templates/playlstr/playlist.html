@@ -3,7 +3,6 @@
 {% block head %}
     <title>Playlist</title>
     <script src="{% static 'js/playlist.js' %}"></script>
-    <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
 {% endblock %}
 {% block content %}
     {% if playlist %}
@@ -29,7 +28,9 @@
                 </div>
                 <div id="trackSearchTitle" class="big-text" style="display: none; margin-top: 10px;">
                     Add Tracks
-                    <button id="enableTrackSearch" type="button" class="btn btn-primary" onclick="toggleTrackSearch()">+</button>
+                    <button id="enableTrackSearch" type="button" class="btn btn-primary" onclick="toggleTrackSearch()">
+                        +
+                    </button>
                 </div>
                 <div id="addTrackContainer" style="display:none;">
                     <div id="trackSearchHeader" class="form-row">
@@ -38,11 +39,13 @@
                                     style="margin-top: 20px; margin-bottom: 20px;">
                                 Advanced
                             </button>
-                            <button id="searchSpotifyButton" type="button" class="btn btn-secondary" onclick="getSpotifyResults()"
+                            <button id="searchSpotifyButton" type="button" class="btn btn-secondary"
+                                    onclick="getSpotifyResults()"
                                     style="margin-top: 20px; margin-bottom: 20px;">
                                 Search Spotify
                             </button>
-                            <button id="manualAddButton" type="button" class="btn btn-secondary" onclick="showNewTrackDialog()">
+                            <button id="manualAddButton" type="button" class="btn btn-secondary"
+                                    onclick="showNewTrackDialog()">
                                 Add Track Manually
                             </button>
                             <div style="display: inline-block; color: green; margin-left: 20px;" id="addSuccessDialog">

@@ -1,14 +1,9 @@
-function deleteTrack(track_id) {
-
-}
-
-
 function importSpotifyUrl() {
     let import_url = document.getElementById('spotifyImportInput').value;
+    let location = document.location.toString();
     if (spotifyAccessToken === null) {
-        newSpotifyAccessToken(import_url);
-    } else {
-        console.log(spotifyAccessToken);
+        alert('Authenticate with Spotify first');
+        return;
     }
     if (import_url.match('^http(s?):\\/\\/open\\.spotify\\.com\\/playlist\\/.{22}\\/?')) {
         $('#invalidSpotifyUrl').hide();
@@ -24,7 +19,7 @@ function importSpotifyUrl() {
         headers: {'X-CSRFToken': csrfToken},
         cache: false,
         timeout: 30000,
-        data: {'playlist_url' : import_url, 'access_token': spotifyAccessToken},
+        data: {'playlist_url': import_url, 'access_token': spotifyAccessToken},
         error: spotifyImportFail,
         success: spotifyImportComplete,
         dataType: 'text'

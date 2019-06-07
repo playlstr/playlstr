@@ -3,18 +3,8 @@
 {% block head %}
     <title>Import</title>
     <script src="{% static 'js/index.js' %}"></script>
-    <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
 {% endblock %}
 {% block content %}
-    {% if user.is_authenticated %}
-        <div id="logoutDiv" class="centered">
-        <a class="btn btn-primary" href="{% url 'logout' %}">Logout</a>
-        </div>
-    {% else %}
-        <div id="loginDiv" class="centered">
-            <a class="btn btn-primary" href="{% url 'social:begin' 'google-oauth2' %}">Login</a>
-        </div>
-    {% endif %}
     <div id="importPlaylist" class="h2 centered padding-sm">
         <a href="import/">Import playlist</a>
     </div>
@@ -23,7 +13,8 @@
     </div>
     <div id="createPlaylistFail" class="alert alert-danger hidden">Failed to create playlist, please try again</div>
     <!-- New playlist modal -->
-    <div class="modal fade" id="createPlaylistModal" tabindex="-1" role="dialog" aria-labelledby="createPlaylistModalLabel" aria-hidden="true">
+    <div class="modal fade" id="createPlaylistModal" tabindex="-1" role="dialog"
+         aria-labelledby="createPlaylistModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">

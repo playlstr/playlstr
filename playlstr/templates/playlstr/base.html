@@ -2,32 +2,62 @@
 <html lang="en">
 {% load static %}
 <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <link rel="stylesheet"
-              href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-              integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-              crossorigin="anonymous"/>
-        <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
-        <title>{% block title %}{% endblock %}</title>
-        {% block head %}
-        {% endblock %}
-        <script type="text/javascript">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+    <title>{% block title %}{% endblock %}</title>
+    <script type="text/javascript">
         let csrfToken = '{{ csrf_token }}';
-        </script>
+        let state = '';
+        {% if user.is_authenticated %}
+            const authenticated = true;
+        {% else %}
+            const authenticated = false;
+        {% endif %}
+    </script>
+    <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
+    {% block head %}
+    {% endblock %}
 </head>
 <body>
-    {% block content-header %}
-    {% endblock %}
-    <div class="content container">
-        <div class="row">
-            {% block content %}
-            {% endblock %}
-        </div>
+<nav class="navbar navbar-dark">
+    <form class="form-inline">
+        <a href="/">
+            <button class="btn btn-dark btn-navbar" type="button"> &#127968;</button>
+        </a>
+        {% if user.is_authenticated %}
+            <button class="btn btn-danger btn-navbar" type="button" onclick="location.href='{% url 'logout' %}';">
+                Logout
+            </button>
+            <button class="btn btn-success btn-spotify-auth btn-navbar" type="button" onclick="spotifyAuthLoggedIn();">
+                Spotify
+                Authenticate
+            </button>
+        {% else %}
+            <button class="btn btn-dark btn-navbar" type="button"
+                    onclick="location.href='{% url 'social:begin' 'google-oauth2' %}';">Log In
+            </button>
+            <button class="btn btn-success btn-navbar" type="button" onclick="spotifyAuthLoggedOut();"
+                    id="spotifyAuthButton">Spotify Authenticate
+            </button>
+        {% endif %}
+    </form>
+</nav>
+{% block content-header %}
+{% endblock %}
+<div class="content container">
+    <div class="row">
+        {% block content %}
+        {% endblock %}
     </div>
+</div>
 </body>
 </html>

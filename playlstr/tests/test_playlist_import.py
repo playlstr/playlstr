@@ -1,7 +1,7 @@
 from django.test import TestCase
-from ..playlist_utils import *
 
 from ..apikeys import *
+from ..playlist_utils import *
 
 
 class SpotifyImportBasicTestCase(TestCase):

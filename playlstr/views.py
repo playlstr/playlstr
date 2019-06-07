@@ -1,11 +1,9 @@
+from django.contrib.auth import logout
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout
-import json
 
-from .models import *
-from .settings import LOGOUT_REDIRECT_URL
 from .playlist_utils import *
+from .settings import LOGOUT_REDIRECT_URL
 from .spotify_utils import *
 from .track_utils import *
 
@@ -76,6 +74,19 @@ def playlist_update(request):
         return HttpResponse("Invalid")
     return HttpResponse(update_playlist(request.POST))
 
+
 def logout_view(request):
     logout(request)
     return redirect(LOGOUT_REDIRECT_URL)
+
+
+def get_spotify_token(request):
+    if not request.is_ajax() or request.user is None:
+        return HttpResponse("Invalid")
+    return JsonResponse(json.dumps(get_user_spotify_token(request.user)), safe=False)
+
+
+def spotify_auth_user(request):
+    if not request.is_ajax() or request.user is None:
+        return HttpResponse("Invalid")
+    return HttpResponse(spotify_parse_code({'post': request.POST, 'user': request.user}))

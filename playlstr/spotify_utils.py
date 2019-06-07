@@ -1,7 +1,11 @@
-from re import match
 import json
+from math import floor
+from re import match
+
 from django.db.models import Q
-from requests import get
+from requests import get, post
+
+from playlstr.apikeys import *
 from .models import *
 
 
@@ -90,3 +94,68 @@ def valid_spotify_token(token):
     headers = {'Authorization': 'Bearer {}'.format(token)}
     response = get(test_url, headers=headers)
     return response.status_code == 200
+
+
+def get_user_spotify_token(user):
+    if not isinstance(user, PlaylstrUser):
+        return 'invalid'
+    if user.spotify_access_token is None or user.spotify_refresh_token is None:
+        return 'unauthorized'
+    if user.spotify_token_expiry is None or user.spotify_token_expiry <= timezone.now():
+        updated_token = update_spotify_token_for_user_with_valid_tokens(user)
+        if updated_token != 'success':
+            return updated_token
+    return {'access_token': user.spotify_access_token,
+            'expires_in': floor((user.spotify_token_expiry - timezone.now()).total_seconds())}
+
+
+def update_spotify_token_for_user_with_valid_tokens(user):
+    body = {'grant_type': 'refresh_token', 'refresh_token': user.spotify_refresh_token}
+    headers = {'Authorization': 'Basic {}'.format(SPOTIFY_B64_CREDS)}
+    response = post('https://accounts.spotify.com/api/token', headers=headers, data=body)
+    if response.status_code != 200:
+        print(response.reason)
+        return 'response error'
+    try:
+        info = response.json()
+    except json.JSONDecodeError:
+        return 'json error'
+    if 'access_token' not in info:
+        return 'access token error'
+    if 'expires_in' not in info:
+        info['expires_in'] = 3600
+    if 'refresh_token' in info:
+        user.spotify_refresh_token = info['refresh_token']
+    user.spotify_access_token = info['access_token']
+    try:
+        user.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
+    except ValueError:
+        return 'invalid expiry'
+    user.save()
+    return 'success'
+
+
+def spotify_parse_code(info):
+    data = info['post']
+    user = info['user']
+    headers = {'Authorization': 'Basic {}'.format(SPOTIFY_B64_CREDS)}
+    body = {'grant_type': 'authorization_code', 'code': data['code'], 'redirect_uri': data['redirect_uri']}
+    response = post('https://accounts.spotify.com/api/token', headers=headers, data=body)
+    if response.status_code != 200:
+        return response.reason
+    try:
+        info = response.json()
+    except json.JSONDecodeError:
+        return 'invalid json'
+    if 'access_token' not in info or 'refresh_token' not in info:
+        return ''
+    if 'expires_in' not in info:
+        info['expires_in'] = 3600
+    user.spotify_refresh_token = info['refresh_token']
+    user.spotify_access_token = info['access_token']
+    try:
+        user.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
+        print(user.spotify_token_expiry)
+    except ValueError:
+        return ''
+    user.save()
