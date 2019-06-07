@@ -4,7 +4,7 @@ from .spotify_utils import *
 from .track_utils import *
 
 
-def update_playlist(data):
+def update_playlist(data: dict) -> str:
     changed = False
     # Validate spotify token before changing anything in the DB
     spotify_ids = []
@@ -70,7 +70,7 @@ def update_playlist(data):
     return 'success'
 
 
-def add_track_by_metadata(data):
+def add_track_by_metadata(data: dict) -> str:
     if 'title' not in data:
         return 'invalid'
     if 'isrc' in data:

@@ -6,8 +6,7 @@ from django.utils.timezone import is_aware, make_aware
 from .models import *
 
 
-def create_custom_track(data):
-    info = json.loads(data)
+def create_custom_track(info: dict) -> str:
     if 'title' not in info:
         return 'invalid title'
     track = Track.objects.create(title=info['title'])
