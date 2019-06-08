@@ -30,11 +30,13 @@ class Track(models.Model):
     album = models.CharField(max_length=255, default=UNKNOWN_ALBUM)
     artist = models.CharField(max_length=255, default=UNKNOWN_ARTIST)
     # Additional track info
+    track_number = models.IntegerField(null=True, blank=True)
     is_single = models.BooleanField(default=False)
     album_artist = models.CharField(max_length=255, default=None, blank=True, null=True)
+    year = models.IntegerField(default=None, blank=True, null=True)
     release_date = models.DateField(default=None, blank=True, null=True)
     image_url = models.CharField(max_length=512, default=None, blank=True, null=True)
-    duration_ms = models.IntegerField(default=None, blank=True, null=True)
+    duration = models.IntegerField(default=None, blank=True, null=True)
     genres = ArrayField(models.CharField(max_length=20, blank=False, null=False), null=True)
     album_release = models.CharField(max_length=64, blank=True, null=True, unique=True)
     source = models.SmallIntegerField(
@@ -58,7 +60,7 @@ class Track(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['title', 'album', 'artist', 'album_release', 'duration_ms'],
+            models.UniqueConstraint(fields=['title', 'album', 'artist', 'album_release', 'duration'],
                                     name='unique tracks')
         ]
 

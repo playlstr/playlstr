@@ -1,6 +1,7 @@
 from django.contrib.auth import logout
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
 from .playlist_utils import *
 from .settings import LOGOUT_REDIRECT_URL
@@ -90,3 +91,19 @@ def spotify_auth_user(request):
     if not request.is_ajax() or request.user is None:
         return HttpResponse("Invalid")
     return HttpResponse(spotify_parse_code({'post': request.POST, 'user': request.user}))
+
+
+@csrf_exempt
+def client_import(request):
+    try:
+        tracks = json.loads(request.POST['tracks'])
+    except KeyError:
+        return HttpResponse('No tracks received', status=400)
+    except json.JSONDecodeError:
+        return HttpResponse('Invalid tracks json', status=400)
+    else:
+        try:
+            name = request.POST['playlist_name']
+        except KeyError:
+            name = None
+        return HttpResponse(client_import_parse(name, tracks))

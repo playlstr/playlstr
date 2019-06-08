@@ -1,5 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
-
 from .spotify_utils import *
 from .track_utils import *
 
@@ -70,22 +68,12 @@ def update_playlist(data: dict) -> str:
     return 'success'
 
 
-def add_track_by_metadata(data: dict) -> str:
-    if 'title' not in data:
-        return 'invalid'
-    if 'isrc' in data:
-        try:
-            track = Track.objects.get(isrc=data['isrc'])
-            return track.track_id
-        except ObjectDoesNotExist:
-            pass
-    query = Q(title=data['title'])
-    if 'artist' in data:
-        query.add(Q(artist=data['artist']), Q.AND)
-    if 'album' in data:
-        query.add(Q(album=data['album']), Q.AND)
-    track = Track.objects.filter(query).first()
-    if track is None:
-        return create_custom_track(data)
-    else:
-        return track.track_id
+def client_import_parse(name: str, tracks: list) -> str:
+    playlist = Playlist.objects.create(name=name)
+    index = 0
+    for t in tracks:
+        track = add_track_by_metadata(t)
+        # TODO handle duplicate tracks
+        PlaylistTrack.objects.create(track=track, playlist=playlist, index=index)
+        index += 1
+    return playlist.playlist_id

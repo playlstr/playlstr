@@ -1,6 +1,5 @@
 from django.test import TestCase
 
-from ..apikeys import *
 from ..playlist_utils import *
 
 

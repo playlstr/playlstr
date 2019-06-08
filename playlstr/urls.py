@@ -31,5 +31,6 @@ urlpatterns = [
     path('', include('social_django.urls', namespace='social')),
     path('logout/', views.logout_view, name='logout'),
     path('get-spotify-token/', views.get_spotify_token, name='get_spotify_token'),
-    path('spotify-auth-user/', views.spotify_auth_user, name='spotify_auth_user')
+    path('spotify-auth-user/', views.spotify_auth_user, name='spotify_auth_user'),
+    path('client-import/', views.client_import, name='client_import')
 ]

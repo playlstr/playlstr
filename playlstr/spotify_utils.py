@@ -82,7 +82,7 @@ def track_from_spotify_json(track_json: dict) -> Track:
     except KeyError:
         pass
     try:
-        track.duration_ms = track_json['duration_ms']
+        track.duration = round(track_json['duration_ms'] * 1000)
     except KeyError:
         pass
     track.save()
