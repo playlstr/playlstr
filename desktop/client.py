@@ -8,7 +8,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Import playlist to playlstr')
     parser.add_argument('playlist', type=str, nargs='+', help='A playlist to import')
     parser.add_argument('-am', '--add-missing', action='store_true', help='Add tracks whose local file doesn\'t exist')
-    parser.add_argument('-hash', '--hash', action='store_true', help='Use file hashes for track matching')
+    parser.add_argument('-ha', '--hash', action='store_true', help='Use file hashes for track matching')
     parser.add_argument('-u', '--user', type=int, action='store', default=-1,
                         help='User id to associate imported playlists with')
     parser.add_argument('-xt', '--m3u-ext', action='store_true',

@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Q, ObjectDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
@@ -86,3 +88,93 @@ def create_custom_track(info: dict) -> Track:
         track.duration = int(info['duration'])
     track.save()
     return track
+
+
+def guess_info_from_path(file_path: str) -> dict:
+    info = {}
+    # Get path as a valid unix path
+    file_path = file_path.lstrip().rstrip()
+    if re.match(r'^[A-Z]:\\.*$', file_path):
+        file_path.replace('\\', '/')
+    # Split up the path
+    path = file_path.split('/')
+    path.reverse()
+    if len(path) == 1:
+        path = file_path.split(' - ')
+    if len(path) < 2:
+        path.append('')
+    if len(path) < 3:
+        path.append('')
+    file_with_folder = path[1] + path[0]
+    file_no_extension = path[0].rsplit('.', 1)[0]
+    ''' Try to get year (at least 1700) from filename and parent directory'''
+    # First look for year in brackets
+    year = re.search(r'[\[({]((1[7-9])|(20))\d{2}[\])}]', file_with_folder)
+    # If no year in brackets just look for a year
+    if year is None:
+        year = re.search(r'((1[7-9])|(20))\d{2}', file_with_folder)
+        if year is not None:
+            info['year'] = int(year.group(0))
+    else:
+        info['year'] = int(year.group(0)[1:-1])
+
+    ''' Try to get track number (up to 99) from filename '''
+    # Track number at beginning
+    # TODO handle track number in different places
+    track_no = re.search(r'^[\d|A|B]\d?.*', file_no_extension)
+    # Get just track number for case where track number is at beginning
+    if track_no:
+        track_no = track_no.group(0)
+        if len(track_no) > 1 and track_no[1].isdecimal():
+            track_no = track_no[0:2]
+        else:
+            track_no = track_no[0]
+        info['track_number'] = track_no
+    ''' Try to get artist/album name '''
+    # Check for structure artist - album/tracks
+    folder = path[1]
+    # Delete parts of the directory name that aren't album/artist so hyphens inside don't mess up parsing
+    folder = re.sub(r'{.*}', '', folder)
+    folder = re.sub(r'\[.*\]', '', folder)
+    if '-' in folder:
+        split = folder.lstrip().rstrip().split('-')
+        if len(split) > 2:
+            for s in split:
+                if re.match(r'\d{4}', s.lstrip().rstrip()):
+                    split.remove(s)
+            split = split[0:2]
+        artist = split[0].rstrip()
+        album = split[1].lstrip()
+    # Structure artist/album/tracks
+    else:
+        artist = path[2]
+        album = path[1]
+    # TODO make this work with albums/artists with parentheses in their name
+    if artist != '':
+        artist = re.sub(r'\(.*?\)', '', artist)
+        info['artist'] = artist.replace('_', ' ').rstrip().lstrip()
+    # Try to isolate album name
+    if album != '':
+        album = re.sub(r'\(.*?\)', '', album)
+        info['album'] = album.replace('_', ' ').rstrip().lstrip()
+
+    ''' Try to get catalog number of album'''
+    non_version_info = re.compile(r'^((FLAC)|(WEB ?-? ?(FLAC)?)|(SACD)|(CD)|([Vv]inyl)|(MP3)|(24 ?[Bb]it)|(\d{4})).*$')
+    curly = re.finditer(r'{([a-zA-Z]|\d| )* ?-?[ ,\d-]*}', path[1])
+    for c in curly:
+        if not re.match(non_version_info, c.group(0)):
+            info['album_version'] = c.group(0)[1:-1]
+            break
+    if 'album_version' not in info:
+        square = re.finditer(r'\[([a-zA-Z]|\d| )* ?-?[ ,\d-]*\]', path[1])
+        for s in square:
+            if not re.match(non_version_info, s.group(0)):
+                info['album_version'] = s.group(0)[1:-1]
+                break
+        if 'album_version' not in info:
+            parenth = re.finditer(r'\(([a-zA-Z]|\d| )* ?-?[ ,\d-]*\)', path[1])
+            for p in parenth:
+                if not re.match(non_version_info, p.group(0)):
+                    info['album_version'] = p.group(0)[1:-1]
+                    break
+    return info

@@ -30,7 +30,7 @@ class Track(models.Model):
     album = models.CharField(max_length=255, default=UNKNOWN_ALBUM)
     artist = models.CharField(max_length=255, default=UNKNOWN_ARTIST)
     # Additional track info
-    track_number = models.IntegerField(null=True, blank=True)
+    track_number = models.CharField(max_length=2, null=True, blank=True)
     is_single = models.BooleanField(default=False)
     album_artist = models.CharField(max_length=255, default=None, blank=True, null=True)
     year = models.IntegerField(default=None, blank=True, null=True)
