@@ -16,7 +16,7 @@ def add_track_by_metadata(data: dict) -> Track:
             return track.track_id
         except ObjectDoesNotExist:
             pass
-    track = Track.objects.filter(md5=data['hash']).first()
+    track = Track.objects.filter(md5=data['hash']).first() if 'hash' in data else None
     if track is None:
         query = Q(title=data['title'])
         if 'artist' in data and len(data['artist']) > 0:
@@ -136,8 +136,9 @@ def guess_info_from_path(file_path: str) -> dict:
     # Delete parts of the directory name that aren't album/artist so hyphens inside don't mess up parsing
     folder = re.sub(r'{.*}', '', folder)
     folder = re.sub(r'\[.*\]', '', folder)
+    folder = re.sub(r'\(.*\)', '', folder)
     if '-' in folder:
-        split = folder.lstrip().rstrip().split('-')
+        split = folder.lstrip().rstrip().split('-', 1)
         if len(split) > 2:
             for s in split:
                 if re.match(r'\d{4}', s.lstrip().rstrip()):
@@ -151,30 +152,38 @@ def guess_info_from_path(file_path: str) -> dict:
         album = path[1]
     # TODO make this work with albums/artists with parentheses in their name
     if artist != '':
+        artist = re.sub(r'^FLAC', '', artist)
         artist = re.sub(r'\(.*?\)', '', artist)
         info['artist'] = artist.replace('_', ' ').rstrip().lstrip()
     # Try to isolate album name
     if album != '':
+        album = re.sub(r'FLAC$', '', album)
         album = re.sub(r'\(.*?\)', '', album)
         info['album'] = album.replace('_', ' ').rstrip().lstrip()
 
-    ''' Try to get catalog number of album'''
+    ''' Try to get catalog number of album '''
     non_version_info = re.compile(r'^((FLAC)|(WEB ?-? ?(FLAC)?)|(SACD)|(CD)|([Vv]inyl)|(MP3)|(24 ?[Bb]it)|(\d{4})).*$')
     curly = re.finditer(r'{([a-zA-Z]|\d| )* ?-?[ ,\d-]*}', path[1])
     for c in curly:
-        if not re.match(non_version_info, c.group(0)):
+        if not re.match(non_version_info, c.group(0).replace('{', '').replace('}', '')):
             info['album_version'] = c.group(0)[1:-1]
             break
     if 'album_version' not in info:
         square = re.finditer(r'\[([a-zA-Z]|\d| )* ?-?[ ,\d-]*\]', path[1])
         for s in square:
-            if not re.match(non_version_info, s.group(0)):
+            if not re.match(non_version_info, s.group(0).replace('[', '').replace(']', '')):
                 info['album_version'] = s.group(0)[1:-1]
                 break
         if 'album_version' not in info:
-            parenth = re.finditer(r'\(([a-zA-Z]|\d| )* ?-?[ ,\d-]*\)', path[1])
+            parenth = re.finditer(r'\(([a-zA-Z]|\d| )* ?-?[a-zA-Z ,\d-]*\)', path[1])
             for p in parenth:
-                if not re.match(non_version_info, p.group(0)):
+                if not re.match(non_version_info, p.group(0).replace('(', '').replace(')', '')):
                     info['album_version'] = p.group(0)[1:-1]
                     break
+
+    ''' Try to get track name '''
+    if re.match(r'[ABC\d]\d ?-? ?.*', file_no_extension):
+        info['title'] = re.sub(r'(\d{1,2} ?-? ?)', '', file_no_extension, 1)
+    else:
+        info['title'] = file_no_extension
     return info

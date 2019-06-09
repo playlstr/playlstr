@@ -27,6 +27,7 @@ function importSpotifyUrl() {
 }
 
 function spotifyImportComplete(data) {
+    console.log(data);
     url = 'http://' + window.location.host + '/list/' + data;
     window.location = url;
 }
@@ -35,3 +36,32 @@ function spotifyImportFail(data) {
     $('spotifyImportFailed').show();
 }
 
+function importPlaylistFile(fileInput) {
+    console.log('importing');
+    let reader = new FileReader();
+    if (!fileInput.files) return;
+    let file = fileInput.files[0];
+    reader.fileName = file.name;
+    reader.addEventListener('load', sendPlaylistImportRequest);
+    reader.readAsText(file);
+}
+
+function sendPlaylistImportRequest(callback) {
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + window.location.host + '/local-import/',
+        headers: {'X-CSRFToken': csrfToken},
+        cache: false,
+        timeout: 30000,
+        data: {'name': callback.target.fileName, 'playlist': callback.target.result},
+        error: localImportFail,
+        success: spotifyImportComplete,
+        dataType: 'text'
+    });
+
+}
+
+function localImportFail(error) {
+    // TODO
+    console.log(error);
+}

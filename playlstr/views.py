@@ -43,7 +43,7 @@ def create_playlist(request):
 
 def track_autocomplete(request):
     if not request.is_ajax():
-        return HttpResponse("Invalid")
+        return HttpResponse("Invalid", status=400)
     try:
         term = request.POST['term']
     except KeyError:
@@ -72,7 +72,7 @@ def track_autocomplete(request):
 
 def playlist_update(request):
     if not request.is_ajax():
-        return HttpResponse("Invalid")
+        return HttpResponse("Invalid", status=400)
     return HttpResponse(update_playlist(request.POST))
 
 
@@ -83,14 +83,21 @@ def logout_view(request):
 
 def get_spotify_token(request):
     if not request.is_ajax() or request.user is None:
-        return HttpResponse("Invalid")
+        return HttpResponse("Invalid", status=400)
     return JsonResponse(json.dumps(get_user_spotify_token(request.user)), safe=False)
 
 
 def spotify_auth_user(request):
     if not request.is_ajax() or request.user is None:
-        return HttpResponse("Invalid")
+        return HttpResponse("Invalid", status=400)
     return HttpResponse(spotify_parse_code({'post': request.POST, 'user': request.user}))
+
+
+def local_file_import(request):
+    if not request.is_ajax() or 'playlist' not in request.POST or 'name' not in request.POST:
+        return HttpResponse('Invalid', status=400)
+    result = import_playlist_from_string(request.POST['name'], request.POST['playlist'])
+    return HttpResponse(status=400, reason='Malformed or empty playlist') if result == 'fail' else HttpResponse(result)
 
 
 @csrf_exempt

@@ -93,6 +93,11 @@ class Playlist(models.Model):
     last_sync_spotify = models.DateTimeField(max_length=64, default=timezone.now)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)
 
+    def get_absolute_url(self):
+        url = '/list/{}/'.format(self.playlist_id)
+        print('loading url {}'.format(url))
+        return url
+
 
 class PlaylistTrack(models.Model):
     """

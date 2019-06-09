@@ -20,14 +20,13 @@ def import_m3u(file: TextIOWrapper, args: dict) -> list:
     for line in file:
         line = line.rstrip()
         if on_inf:
-            if ext:
-                line = line[7:]
-                split_colon = line.split(':')
-                inf_duration = split_colon[0] if len(split_colon) > 0 else None
-                split_dash = line.split('-')
-                inf_artist = split_dash[0] if len(split_dash) > 0 else None
-                inf_track = split_dash[1] if len(split_dash) > 1 else None
-                on_inf = False
+            line = line[7:]
+            split_colon = line.split(':')
+            inf_duration = split_colon[0] if len(split_colon) > 0 else None
+            split_dash = line.split('-')
+            inf_artist = split_dash[0].strip().split(',', 1)[1] if len(split_dash) > 0 else None
+            inf_track = split_dash[1] if len(split_dash) > 1 else None
+            on_inf = False
             continue
         else:
             # Get file tags
