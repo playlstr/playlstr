@@ -1,4 +1,5 @@
 import json
+from base64 import b64encode
 from math import floor
 from re import match
 
@@ -109,7 +110,8 @@ def get_user_spotify_token(user: PlaylstrUser) -> dict:
 
 def update_spotify_token_for_user_with_valid_tokens(user: PlaylstrUser) -> str:
     body = {'grant_type': 'refresh_token', 'refresh_token': user.spotify_refresh_token}
-    headers = {'Authorization': 'Basic {}'.format(SPOTIFY_B64_CREDS)}
+    headers = {'Authorization': 'Basic {}'.format(
+        b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
     response = post('https://accounts.spotify.com/api/token', headers=headers, data=body)
     if response.status_code != 200:
         print(response.reason)
@@ -136,7 +138,8 @@ def update_spotify_token_for_user_with_valid_tokens(user: PlaylstrUser) -> str:
 def spotify_parse_code(info: dict) -> str:
     data = info['post']
     user = info['user']
-    headers = {'Authorization': 'Basic {}'.format(SPOTIFY_B64_CREDS)}
+    headers = {'Authorization': 'Basic {}'.format(
+        b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
     body = {'grant_type': 'authorization_code', 'code': data['code'], 'redirect_uri': data['redirect_uri']}
     response = post('https://accounts.spotify.com/api/token', headers=headers, data=body)
     if response.status_code != 200:

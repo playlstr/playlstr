@@ -113,6 +113,6 @@ class PlaylistTrack(models.Model):
     class Meta:
         ordering = ['index']
         constraints = [
-            models.UniqueConstraint(fields=['track', 'playlist'], name='unique playlist+track'),
+            models.UniqueConstraint(fields=['track', 'playlist'], name='track only in playlist once'),
             models.UniqueConstraint(fields=['playlist', 'index'], name='unique track index'),
         ]

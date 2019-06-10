@@ -1,5 +1,11 @@
 let spotifyAccessToken = null;
 
+function hideSpotifyAuth() {
+    window.onload = function () {
+        $('#spotifyAuthButton').hide();
+    }
+}
+
 function getNewAccessTokenLoggedIn() {
     $.ajax({
         type: 'GET',
@@ -19,6 +25,7 @@ function parseUserSpotifyToken(data) {
     let expiryDate = new Date();
     expiryDate.setSeconds(expiryDate.getSeconds() + parseInt(data['expires_in']));
     document.cookie = 'spotify-token=' + data['access_token'] + '; expires=' + expiryDate.toString() + '; path=/';
+    hideSpotifyAuth();
 }
 
 
@@ -32,6 +39,7 @@ function loadSpotifyAccessToken() {
         return;
     }
     spotifyAccessToken = savedToken;
+    hideSpotifyAuth();
 }
 
 function parseSpotifyAccessTokenFromLocationLoggedIn() {
@@ -71,6 +79,7 @@ function parseSpotifyAccessTokenFromLocationLoggedOut() {
     expiryDate.setSeconds(expiryDate.getSeconds() + parseInt(location.substring(expiry_start, expiry_end)) - 5);
     document.cookie = 'spotify-token=' + token + '; expires=' + expiryDate.toString() + '; path=/';
     document.location.hash = '';
+    hideSpotifyAuth();
 }
 
 function spotifyAuthLoggedOut() {

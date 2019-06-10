@@ -157,7 +157,7 @@ def guess_info_from_path(file_path: str) -> dict:
         info['artist'] = artist.replace('_', ' ').rstrip().lstrip()
     # Try to isolate album name
     if album != '':
-        album = re.sub(r'FLAC$', '', album)
+        album = re.sub(r'[ ^]?FLAC[$ ]', '', album)
         album = re.sub(r'\(.*?\)', '', album)
         info['album'] = album.replace('_', ' ').rstrip().lstrip()
 

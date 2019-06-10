@@ -14,9 +14,9 @@
         </script>
         <div id="playlist" class="container-fluid">
             <h1 style="padding: 50px;" class="text-center" id="playlistName">{{ playlist.name }}</h1>
-            <div id="editContainer" class="container vmargin-sm">
-                <div id="editControlButtons" class="" style="width: 1000px;">
-                    <button type="button" class="btn btn-primary form-btn" id="editButton" onclick="enterEditMode()">
+            <div id="playlistButtons" class="container-fluid">
+                <div id="editControlButtons">
+                    <button type="button" class="btn btn-primary form-btn" id="editButton" onclick="enterEditMode();">
                         Edit
                     </button>
                     <button type="button" class="btn btn-primary" id="saveButton" style="display: none;"
@@ -26,98 +26,99 @@
                             onclick="exitEditMode(false)">Cancel
                     </button>
                 </div>
-                <div id="trackSearchTitle" class="big-text" style="display: none; margin-top: 10px;">
-                    Add Tracks
-                    <button id="enableTrackSearch" type="button" class="btn btn-primary" onclick="toggleTrackSearch()">
-                        +
-                    </button>
-                </div>
-                <div id="addTrackContainer" style="display:none;">
-                    <div id="trackSearchHeader" class="form-row">
-                        <div>
-                            <button type="button" class="btn btn-secondary" onclick="toggleAdvancedTrackSearch()"
-                                    style="margin-top: 20px; margin-bottom: 20px;">
-                                Advanced
-                            </button>
-                            <button id="searchSpotifyButton" type="button" class="btn btn-secondary"
-                                    onclick="getSpotifyResults()"
-                                    style="margin-top: 20px; margin-bottom: 20px;">
-                                Search Spotify
-                            </button>
-                            <button id="manualAddButton" type="button" class="btn btn-secondary"
-                                    onclick="showNewTrackDialog()">
-                                Add Track Manually
-                            </button>
-                            <div style="display: inline-block; color: green; margin-left: 20px;" id="addSuccessDialog">
-                                Added!
-                            </div>
-                        </div>
-                    </div>
-                    <div id="trackSearchInputs">
-                        <div id="simpleTrackSearch" class="form-group">
-                            <input type="text" id="simpleTrackSearchText" name="simpleTrackSearchText"
-                                   class="form-control">
-                        </div>
-                        <div id="advancedTrackSearch" class="form-group" style="display: none;">
-                        </div>
-                        <div id="addTrackButtons" class="form-row" style="padding: 20px;">
-                        </div>
-                    </div>
-                    <div id="trackSearchResults" class="search-results-table">
-                        <table class="table table-striped" id="trackSearchResultsTable">
-                            <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Artist</th>
-                                <th>Album</th>
-                                <th>Add</th>
-                            </tr>
-                            </thead>
-                            <tbody id="trackSearchResultsTBody">
-                            <tr>
-                                <td>No matching tracks</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
-            <div id="trackList">
-                <table class="table table-bordered pagin-table">
-                    <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Artist</th>
-                        <th>Album</th>
-                        <th>Listen</th>
-                        <th class="rm-btn-container" style="display: none;">Remove</th>
-                    </tr>
-                    </thead>
-                    <tbody id="trackListTBody">
-                    {% for track in tracks %}
-                        <tr id="{{ track.track_id }}track">
-                            <td><a href="/track/{{ track.track_id }}">{{ track.title }}</a></td>
-                            <td>{{ track.artist }}</td>
-                            <td>{{ track.album }}</td>
-                            <td>
-                                <button type="button" class="btn" style="border: 1px solid black;">
-                                    &#9654; Play
-                                </button>
-                            </td>
-                            <td class="rm-btn-container" style="display: none;">
-                                <button type="button" class="btn" style="border: 1px solid red;"
-                                        onclick="deleteTrack({{ track.track_id }})">&#10060;
-                                </button>
-                            </td>
+            <div id="editContainer" class="container vmargin-sm">
+            </div>
+            <div id="trackSearchTitle" class="big-text" style="display: none; margin-top: 10px;">
+                Add Tracks
+                <button id="enableTrackSearch" type="button" class="btn btn-primary" onclick="toggleTrackSearch();">
+                    +
+                </button>
+            </div>
+            <div id="addTrackContainer" style="display:none;">
+                <div id="trackSearchHeader" class="form-row">
+                    <div>
+                        <button type="button" class="btn btn-secondary" onclick="toggleAdvancedTrackSearch();"
+                                style="margin-top: 20px; margin-bottom: 20px;">
+                            Advanced
+                        </button>
+                        <button id="searchSpotifyButton" type="button" class="btn btn-secondary"
+                                onclick="getSpotifyResults()"
+                                style="margin-top: 20px; margin-bottom: 20px;">
+                            Search Spotify
+                        </button>
+                        <button id="manualAddButton" type="button" class="btn btn-secondary"
+                                onclick="showNewTrackDialog()">
+                            Add Track Manually
+                        </button>
+                        <div style="display: inline-block; color: green; margin-left: 20px;" id="addSuccessDialog">
+                            Added!
+                        </div>
+                    </div>
+                </div>
+                <div id="trackSearchInputs">
+                    <div id="simpleTrackSearch" class="form-group">
+                        <input type="text" id="simpleTrackSearchText" name="simpleTrackSearchText"
+                               class="form-control">
+                    </div>
+                    <div id="advancedTrackSearch" class="form-group" style="display: none;">
+                    </div>
+                    <div id="addTrackButtons" class="form-row" style="padding: 20px;">
+                    </div>
+                </div>
+                <div id="trackSearchResults" class="search-results-table">
+                    <table class="table table-striped" id="trackSearchResultsTable">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Artist</th>
+                            <th>Album</th>
+                            <th>Add</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-
+                        </thead>
+                        <tbody id="trackSearchResultsTBody">
+                        <tr>
+                            <td>No matching tracks</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+        </div>
+        <div id="trackList">
+            <table class="table table-bordered pagin-table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Album</th>
+                    <th>Listen</th>
+                    <th class="rm-btn-container" style="display: none;">Remove</th>
+                </tr>
+                </thead>
+                <tbody id="trackListTBody">
+                {% for track in tracks %}
+                    <tr id="{{ track.track_id }}track">
+                        <td><a href="/track/{{ track.track_id }}">{{ track.title }}</a></td>
+                        <td>{{ track.artist }}</td>
+                        <td>{{ track.album }}</td>
+                        <td>
+                            <button type="button" class="btn" style="border: 1px solid black;">
+                                &#9654; Play
+                            </button>
+                        </td>
+                        <td class="rm-btn-container" style="display: none;">
+                            <button type="button" class="btn" style="border: 1px solid red;"
+                                    onclick="deleteTrack({{ track.track_id }})">&#10060;
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% else %}
         Invalid playlist

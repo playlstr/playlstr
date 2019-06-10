@@ -123,10 +123,12 @@ def create_playlist_from_m3u(name: str, playlist: str, ext_overrides_guess: bool
             info = guess_info_from_path(line)
             if ext:
                 if inf_track:
-                    if 'title' not in info or info['title'] == '' or ext_overrides_guess:
+                    if 'title' not in info or info['title'] == '' or (
+                            ext_overrides_guess and inf_artist is not None and inf_artist != ''):
                         info['title'] = inf_track
                 if inf_artist:
-                    if 'artist' not in info or info['artist'] == '' or ext_overrides_guess:
+                    if 'artist' not in info or info['artist'] == '' or (
+                            ext_overrides_guess and inf_artist is not None and inf_artist != ''):
                         info['artist'] = inf_artist
                 if inf_duration:
                     info['duration'] = inf_duration
