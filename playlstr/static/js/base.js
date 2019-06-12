@@ -1,6 +1,6 @@
 function createPlaylist() {
     $('#createPlaylistFail').hide();
-    let location = window.location.toString();
+    let location = 'http://' + window.location.host.toString() + '/';
     if (document.cookie.length === 0) createPlaylistFail();
     let playlistName = $('#newPlaylistName').val();
     $.ajax({
@@ -16,7 +16,7 @@ function createPlaylist() {
     });
 }
 
-function createPlaylistFail() {
+function createPlaylistFail(data) {
     $('#createPlaylistFail').show();
 }
 

@@ -183,3 +183,11 @@ function addSpotifyTrack(spotify_id) {
 function showNewTrackDialog() {
     // TODO
 }
+
+function exportAsText() {
+
+}
+
+function exportToSpotify() {
+
+}

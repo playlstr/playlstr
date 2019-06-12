@@ -37,6 +37,7 @@ def create_playlist(request):
     new_list = Playlist.objects.create()
     if len(name) > 0:
         new_list.name = name
+    new_list.owner = request.user
     new_list.save()
     return HttpResponse(new_list.playlist_id)
 
@@ -71,8 +72,14 @@ def track_autocomplete(request):
 
 
 def playlist_update(request):
-    if not request.is_ajax():
+    if not request.is_ajax() or 'playlist' not in request.POST:
         return HttpResponse("Invalid", status=400)
+    try:
+        plist = Playlist.objects.get(request.POST['playlist'])
+    except ObjectDoesNotExist:
+        return HttpResponse("Invalid", status=400)
+    if request.user not in plist.editors and request.user != plist.owner:
+        return HttpResponse("Unauthorized", status=401)
     return HttpResponse(update_playlist(request.POST))
 
 

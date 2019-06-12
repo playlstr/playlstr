@@ -15,19 +15,32 @@
         <div id="playlist" class="container-fluid">
             <h1 style="padding: 50px;" class="text-center" id="playlistName">{{ playlist.name }}</h1>
             <div id="playlistButtons" class="container-fluid">
-                <div id="editControlButtons">
-                    <button type="button" class="btn btn-primary form-btn" id="editButton" onclick="enterEditMode();">
-                        Edit
-                    </button>
-                    <button type="button" class="btn btn-primary" id="saveButton" style="display: none;"
-                            onclick="exitEditMode(true)">Save
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;"
-                            onclick="exitEditMode(false)">Cancel
-                    </button>
+                <div id="editControlButtons" class="container-fluid row vmargin-sm">
+                    {% if user.is_authenticated %}
+                        {% if user in playlist.editors or user == playlist.owner %}
+                            <button type="button" class="btn btn-primary form-btn" id="editButton"
+                                    onclick="enterEditMode();">
+                                Edit
+                            </button>
+                            <button type="button" class="btn btn-primary" id="saveButton" style="display: none;"
+                                    onclick="exitEditMode(true)">Save
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;"
+                                    onclick="exitEditMode(false)">Cancel
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                    <div class="dropdown" style="margin-left: 10px;">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdownButton"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Export
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportDropdownButton">
+                            <a class="dropdown-item" href="#" onclick="exportAsText();return false;">Text</a>
+                            <a class="dropdown-item" href="#" onclick="exportToSpotify();return false;">Spotify</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div id="editContainer" class="container vmargin-sm">
             </div>
             <div id="trackSearchTitle" class="big-text" style="display: none; margin-top: 10px;">
                 Add Tracks
