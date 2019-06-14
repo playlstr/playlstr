@@ -1,9 +1,9 @@
 let spotifyAccessToken = null;
 
 function hideSpotifyAuth() {
-    window.onload = function () {
+    $(document).ready(function () {
         $('#spotifyAuthButton').hide();
-    }
+    });
 }
 
 function getNewAccessTokenLoggedIn() {
@@ -92,7 +92,7 @@ function spotifyAuthLoggedIn() {
 
 // https://stackoverflow.com/questions/5639346/what-is-the-shortest-function-for-reading-a-cookie-by-name-in-javascript/25490531#25490531
 function getCookieValue(a) {
-    var b = document.cookie.match('(^|[^;]+)\\s*' + a + '\\s*=\\s*([^;]+)');
+    let b = document.cookie.match('(^|[^;]+)\\s*' + a + '\\s*=\\s*([^;]+)');
     return b ? b.pop() : '';
 }
 

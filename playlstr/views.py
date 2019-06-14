@@ -3,10 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
-from .playlist_utils import *
+from playlstr.util.playlist import *
 from .settings import LOGOUT_REDIRECT_URL
-from .spotify_utils import *
-from .track_utils import *
 
 
 def index(request):
@@ -29,7 +27,9 @@ def import_playlist(request):
 
 
 def spotify_import(request):
-    return HttpResponse(import_spotify(request.POST))
+    params = request.POST
+    params['user'] = request.user
+    return HttpResponse(import_spotify(params))
 
 
 def create_playlist(request):
@@ -75,10 +75,10 @@ def playlist_update(request):
     if not request.is_ajax() or 'playlist' not in request.POST:
         return HttpResponse("Invalid", status=400)
     try:
-        plist = Playlist.objects.get(request.POST['playlist'])
+        plist = Playlist.objects.get(playlist_id=request.POST['playlist'])
     except ObjectDoesNotExist:
         return HttpResponse("Invalid", status=400)
-    if request.user not in plist.editors and request.user != plist.owner:
+    if request.user not in plist.editors.all() and request.user != plist.owner:
         return HttpResponse("Unauthorized", status=401)
     return HttpResponse(update_playlist(request.POST))
 
@@ -103,7 +103,9 @@ def spotify_auth_user(request):
 def local_file_import(request):
     if not request.is_ajax() or 'playlist' not in request.POST or 'name' not in request.POST:
         return HttpResponse('Invalid', status=400)
-    result = import_playlist_from_string(request.POST['name'], request.POST['playlist'])
+    if not request.user:
+        return HttpResponse('Unauthorized', status=401)
+    result = import_playlist_from_string(request.POST['name'], request.POST['playlist'], request.user)
     return HttpResponse(status=400, reason='Malformed or empty playlist') if result == 'fail' else HttpResponse(result)
 
 

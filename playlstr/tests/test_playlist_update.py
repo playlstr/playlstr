@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ..playlist_utils import *
+from playlstr.util.playlist import *
 
 
 # https://stackoverflow.com/a/51423725

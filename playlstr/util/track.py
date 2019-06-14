@@ -4,7 +4,7 @@ from django.db.models import Q, ObjectDoesNotExist
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import is_aware, make_aware
 
-from .models import *
+from playlstr.models import *
 
 
 def add_track_by_metadata(data: dict) -> Track:
@@ -152,12 +152,12 @@ def guess_info_from_path(file_path: str) -> dict:
         album = path[1]
     # TODO make this work with albums/artists with parentheses in their name
     if artist != '':
-        artist = re.sub(r'^FLAC', '', artist)
+        artist = re.sub(r'(^FLAC )|( FLAC )|( FLAC$)', '', artist)
         artist = re.sub(r'\(.*?\)', '', artist)
         info['artist'] = artist.replace('_', ' ').rstrip().lstrip()
     # Try to isolate album name
     if album != '':
-        album = re.sub(r'[ ^]?FLAC[$ ]', '', album)
+        album = re.sub(r'(^FLAC )|( FLAC )|( FLAC$)', '', album)
         album = re.sub(r'\(.*?\)', '', album)
         info['album'] = album.replace('_', ' ').rstrip().lstrip()
 

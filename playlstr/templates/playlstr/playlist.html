@@ -9,7 +9,7 @@
         <script>
             let playlist_id = {{ playlist.playlist_id }};
             $(document).ready(function () {
-                initTrackAutocomplete();
+                init();
             });
         </script>
         <div id="playlist" class="container-fluid">
@@ -22,12 +22,18 @@
                                     onclick="enterEditMode();">
                                 Edit
                             </button>
-                            <button type="button" class="btn btn-primary" id="saveButton" style="display: none;"
-                                    onclick="exitEditMode(true)">Save
-                            </button>
-                            <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;"
-                                    onclick="exitEditMode(false)">Cancel
-                            </button>
+                            <div id="trackSearchButtons" style="display: none;">
+                                <button type="button" class="btn btn-primary btn-padding-h" id="saveButton"
+                                        onclick="exitEditMode(true)">Save
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-padding-h" id="cancelButton"
+                                        onclick="exitEditMode(false)">Cancel
+                                </button>
+                                <button id="enableTrackSearch" type="button" class="btn btn-primary btn-padding-h"
+                                        onclick="toggleTrackSearch();">
+                                    Add Tracks +
+                                </button>
+                            </div>
                         {% endif %}
                     {% endif %}
                     <div class="dropdown" style="margin-left: 10px;">
@@ -42,41 +48,53 @@
                     </div>
                 </div>
             </div>
-            <div id="trackSearchTitle" class="big-text" style="display: none; margin-top: 10px;">
-                Add Tracks
-                <button id="enableTrackSearch" type="button" class="btn btn-primary" onclick="toggleTrackSearch();">
-                    +
-                </button>
-            </div>
-            <div id="addTrackContainer" style="display:none;">
-                <div id="trackSearchHeader" class="form-row">
-                    <div>
-                        <button type="button" class="btn btn-secondary" onclick="toggleAdvancedTrackSearch();"
-                                style="margin-top: 20px; margin-bottom: 20px;">
+            <div id="addTrackContainer" style="display:none;margin-bottom: 20px;">
+                <div id="trackSearchInputs">
+                    <div class="bg-success vmargin-sm" style="display: inline-block; width: 100%;"
+                         id="addSuccessDialog">
+                        Added!
+                    </div>
+                    <div id="searchContainer" class="form-inline">
+                        <div id="trackSearchInputs" style="width: 70%;">
+                            <div id="simpleTrackSearch" class="form-inline">
+                                <input type="text" id="simpleTrackSearchText" name="simpleTrackSearchText"
+                                       style="width: 100%;"
+                                       class="form-control">
+                            </div>
+                            <div id="advancedTrackSearch" style="display: none; width: 100%;">
+                                <form id="advancedTrackSearchForm" class="form-inline">
+                                    <label for="aTrackSearchTitle">Title: </label>
+                                    <input type="text" class="form-control" id="aTrackSearchTitle" style="margin: 5px;">
+                                    <label for="aTrackSearchArtist">Artist: </label>
+                                    <input type="text" class="form-control" id="aTrackSearchArtist"
+                                           style="margin: 5px;">
+                                    <label for="aTrackSearchAlbum">Album: </label>
+                                    <input type="text" class="form-control" id="aTrackSearchAlbum" style="margin: 5px;">
+                                </form>
+                            </div>
+
+                        </div>
+                        <div class="dropdown btn-padding-h dropdown-hover" style="margin-left: 10px;"
+                             id="searchDropdown">
+                            <button class="btn btn-success" type="button" id="searchDropdownButton"
+                                    aria-haspopup="true" aria-expanded="false"
+                                    onclick="searchDefault();" style="padding-bottom: 0.5rem;">
+                                <i class="fa fa-search"></i> <i class="fa fa-angle-down"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="searchDropdownButton" id="searchButtonDropdown">
+                                <a class="dropdown-item" href="#" onclick="searchSpotify();return false;"><i
+                                        class="fa fa-spotify"></i></a>
+                                <a class="dropdown-item" href="#" onclick="searchPlaylstr();return false;">Playlstr</a>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-padding-h vmargin-sm"
+                                onclick="toggleAdvancedTrackSearch();">
                             Advanced
                         </button>
-                        <button id="searchSpotifyButton" type="button" class="btn btn-secondary"
-                                onclick="getSpotifyResults()"
-                                style="margin-top: 20px; margin-bottom: 20px;">
-                            Search Spotify
-                        </button>
-                        <button id="manualAddButton" type="button" class="btn btn-secondary"
+                        <button id="manualAddButton" type="button" class="btn btn-primary btn-padding-h"
                                 onclick="showNewTrackDialog()">
-                            Add Track Manually
+                            +
                         </button>
-                        <div style="display: inline-block; color: green; margin-left: 20px;" id="addSuccessDialog">
-                            Added!
-                        </div>
-                    </div>
-                </div>
-                <div id="trackSearchInputs">
-                    <div id="simpleTrackSearch" class="form-group">
-                        <input type="text" id="simpleTrackSearchText" name="simpleTrackSearchText"
-                               class="form-control">
-                    </div>
-                    <div id="advancedTrackSearch" class="form-group" style="display: none;">
-                    </div>
-                    <div id="addTrackButtons" class="form-row" style="padding: 20px;">
                     </div>
                 </div>
                 <div id="trackSearchResults" class="search-results-table">
@@ -90,25 +108,26 @@
                         </tr>
                         </thead>
                         <tbody id="trackSearchResultsTBody">
-                        <tr>
-                            <td>No matching tracks</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
                         </tbody>
                     </table>
+                    <div id="noResultsInfo" style="padding-left: 10px;">No matching tracks. Try searching a different
+                        site with the search button above.
+                    </div>
                 </div>
             </div>
         </div>
         <div id="trackList">
+            <div id="newTracksWarning" class="container vmargin-sm text-warning" style="display: none;">
+                You have added new tracks (indicated with <i class="fa fa-certificate"></i>). You must click save above
+                to add these tracks.
+            </div>
             <table class="table table-bordered pagin-table">
                 <thead>
                 <tr>
                     <th>Title</th>
                     <th>Artist</th>
                     <th>Album</th>
-                    <th>Listen</th>
+                    <th></th>
                     <th class="rm-btn-container" style="display: none;">Remove</th>
                 </tr>
                 </thead>
@@ -119,12 +138,21 @@
                         <td>{{ track.artist }}</td>
                         <td>{{ track.album }}</td>
                         <td>
-                            <button type="button" class="btn" style="border: 1px solid black;">
-                                &#9654; Play
+                            <button type="button" class="btn btn-dark" onclick="downloadTrack({{ track.track_id }})">
+                                <i class="fa fa-download"></i>
                             </button>
+                            <button type="button" class="btn btn-danger">
+                                <i class="fa fa-play"></i>
+                            </button>
+                            {% if track.spotify_id is not None %}
+                                <button type="button" class="btn btn-success"
+                                        onclick="window.location = 'https://open.spotify.com/track/{{ track.spotify_id }}';">
+                                    <i class="fa fa-spotify"></i>
+                                </button>
+                            {% endif %}
                         </td>
                         <td class="rm-btn-container" style="display: none;">
-                            <button type="button" class="btn" style="border: 1px solid red;"
+                            <button type="button" class="btn btn-outline-danger"
                                     onclick="deleteTrack({{ track.track_id }})">&#10060;
                             </button>
                         </td>

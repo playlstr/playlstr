@@ -7,7 +7,7 @@ from django.db.models import Q
 from requests import get, post
 
 from playlstr.apikeys import *
-from .models import *
+from playlstr.models import *
 
 
 def import_spotify(info: dict) -> str:
@@ -25,7 +25,7 @@ def import_spotify(info: dict) -> str:
     query_headers = {'Authorization': 'Bearer {}'.format(info['access_token'])}
     # Get/create playlist
     playlist_json = get(query_url, headers=query_headers).json()
-    playlist = Playlist.objects.get_or_create(spotify_id=playlist_id)[0]
+    playlist = Playlist.objects.get_or_create(spotify_id=playlist_id, owner=info['user'])[0]
     playlist.name = playlist_json['name']
     playlist.last_sync_spotify = timezone.now()
     playlist.save()
@@ -70,9 +70,7 @@ def track_from_spotify_json(track_json: dict) -> Track:
             isrc = None
         # Create new track
         track = Track.objects.create(title=title)
-    else:
-        # Ensure existing track has correct spotify id
-        track.spotify_id = track_json['id']
+    track.spotify_id = track_json['id']
     # Get track attributes
     try:
         track.artist = track_json['artists'][0]['name']

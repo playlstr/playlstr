@@ -14,8 +14,8 @@
 }
 
 .vmargin-sm {
-    margin-top: 50px;
-    margin-bottom: 50px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .padding-sm {
@@ -40,4 +40,12 @@
     font-size: 16pt;
 }
 
+.btn-padding-h {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.dropdown-hover:hover > .dropdown-menu {
+    display: block;
+}
 

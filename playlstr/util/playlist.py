@@ -1,5 +1,5 @@
-from .spotify_utils import *
-from .track_utils import *
+from .spotify import *
+from .track import *
 
 
 def playlist_add_track(playlist: Playlist, track: Track) -> PlaylistTrack:
@@ -69,7 +69,7 @@ def update_playlist(data: dict) -> str:
         track_json = response.json()
         track = track_from_spotify_json(track_json)
         PlaylistTrack.objects.create(playlist=playlist, track=track, index=last_index)
-    if len(spotify_ids > 0):
+    if len(spotify_ids) > 0:
         changed = True
     if changed:
         playlist.edit_date = timezone.now()
@@ -88,13 +88,13 @@ def client_import_parse(name: str, tracks: list) -> str:
     return playlist.playlist_id
 
 
-def import_playlist_from_string(filename: str, playlist: str) -> str:
+def import_playlist_from_string(filename: str, playlist: str, user: PlaylstrUser) -> str:
     name, filetype = filename.rsplit('.')
     if filetype == 'm3u' or filetype == 'm3u8':
-        return create_playlist_from_m3u(name, playlist)
+        return create_playlist_from_m3u(name, playlist, user)
 
 
-def create_playlist_from_m3u(name: str, playlist: str, ext_overrides_guess: bool = True) -> str:
+def create_playlist_from_m3u(name: str, playlist: str, user: PlaylstrUser, ext_overrides_guess: bool = True) -> str:
     lines = playlist.splitlines()
     if lines[0] == '#EXTM3U':
         ext = True
@@ -138,5 +138,7 @@ def create_playlist_from_m3u(name: str, playlist: str, ext_overrides_guess: bool
                 continue
             if playlist is None:
                 playlist = Playlist.objects.create(name=name)
+                playlist.owner = user
+                playlist.save()
             playlist_add_track(playlist, track)
     return 'fail' if playlist is None else playlist.playlist_id
