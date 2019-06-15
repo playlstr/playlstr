@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
-from playlstr.util.playlist import *
+from playlstr.util.export import *
 from .settings import LOGOUT_REDIRECT_URL
 
 
@@ -107,6 +107,22 @@ def local_file_import(request):
         return HttpResponse('Unauthorized', status=401)
     result = import_playlist_from_string(request.POST['name'], request.POST['playlist'], request.user)
     return HttpResponse(status=400, reason='Malformed or empty playlist') if result == 'fail' else HttpResponse(result)
+
+
+def text_file_export(request):
+    if not request.user.is_authenticated:
+        return HttpResponse('Unauthorized', status=401)
+    try:
+        result = export_playlist_text(request.GET['playlist_id'])
+        if result == 'invalid':
+            raise KeyError
+    except KeyError:
+        return HttpResponse('Invalid', status=400)
+    return HttpResponse(result, content_type='text/plain')
+
+
+def spotify_login_redirect(request):
+    return render(request, 'playlstr/spotify_redirect.html')
 
 
 @csrf_exempt

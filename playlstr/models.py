@@ -31,7 +31,6 @@ class Track(models.Model):
     artist = models.CharField(max_length=255, default=UNKNOWN_ARTIST)
     # Additional track info
     track_number = models.CharField(max_length=2, null=True, blank=True)
-    is_single = models.BooleanField(default=False)
     album_artist = models.CharField(max_length=255, default=None, blank=True, null=True)
     year = models.IntegerField(default=None, blank=True, null=True)
     release_date = models.DateField(default=None, blank=True, null=True)
@@ -66,6 +65,10 @@ class Track(models.Model):
 
     def __str__(self):
         return "({}) {} - {}".format(self.track_id, self.artist, self.title)
+
+    def as_export_text(self):
+        return '{} - {} ({}{})'.format(self.artist, self.title, self.album,
+                                       '' if self.year is None else ', {}'.format(self.year))
 
 
 class Playlist(models.Model):

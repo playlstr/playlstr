@@ -1,4 +1,5 @@
 let spotifyAccessToken = null;
+let SPOTIFY_REDIRECT_URI = 'http://' + window.location.host.toString() + '/spotify-redirect/';
 
 function hideSpotifyAuth() {
     $(document).ready(function () {
@@ -82,12 +83,48 @@ function parseSpotifyAccessTokenFromLocationLoggedOut() {
     hideSpotifyAuth();
 }
 
+function redirectToPreauthUrl() {
+    let location = document.location.toString();
+    let state_start = location.indexOf('state=');
+    if (state_start === -1) {
+        console.log('No state, not redirecting');
+        return;
+    }
+    state_start += 6;
+    let state_end = location.indexOf('&', state_start);
+    if (state_end === -1) state_end = location.length;
+    let state = location.substring(state_start, state_end);
+    let new_url_start = state.indexOf('_redirect_') + 10;
+    if (new_url_start === -1 + 10) {
+        console.log('No redirect url');
+        return;
+    }
+    // Redirect URI should always be the last part of state
+    let new_url = state.substring(new_url_start, state_end);
+    console.log(new_url);
+    location = location.replace(new_url, '');
+    let hash = location.indexOf('#');
+    if (hash === -1) {
+        console.log('Passing no query string to redirect url');
+        window.location.href = new_url;
+        return;
+    }
+    let redirect = decodeURIComponent(new_url);
+    if (redirect[redirect.length - 1] !== '/') {
+        redirect += '/';
+    }
+    redirect += location.substring(hash, location.indexOf('_redirect_'));
+    window.location.href = redirect;
+}
+
 function spotifyAuthLoggedOut() {
-    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + location + (state === '' ? '' : '&state=' + state);
+    state += '_redirect_' + window.location;
+    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + SPOTIFY_REDIRECT_URI + (state === '' ? '' : '&state=' + state);
 }
 
 function spotifyAuthLoggedIn() {
-    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=code&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + location + (state === '' ? '' : '&state=' + state);
+    state += '_redirect_' + window.location;
+    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=code&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + SPOTIFY_REDIRECT_URI + (state === '' ? '' : '&state=' + state);
 }
 
 // https://stackoverflow.com/questions/5639346/what-is-the-shortest-function-for-reading-a-cookie-by-name-in-javascript/25490531#25490531

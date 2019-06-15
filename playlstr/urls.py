@@ -33,5 +33,9 @@ urlpatterns = [
     path('get-spotify-token/', views.get_spotify_token, name='get_spotify_token'),
     path('spotify-auth-user/', views.spotify_auth_user, name='spotify_auth_user'),
     path('client-import/', views.client_import, name='client_import'),
-    path('local-import/', views.local_file_import, name='local_import')
+    path('local-import/', views.local_file_import, name='local_import'),
+    path('spotify-redirect/', views.spotify_login_redirect, name='spotify_redirect'),
+    path('export/', include([
+        path('text/', views.text_file_export, name='export_text')
+    ]))
 ]

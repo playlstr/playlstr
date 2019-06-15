@@ -265,10 +265,29 @@ function showNewTrackDialog() {
 
 function exportAsText() {
     // TODO
+    $.ajax({
+        type: 'GET',
+        url: 'http://{0}/export/text/'.format(window.location.host),
+        data: {'playlist_id': playlist_id},
+        headers: {'X-CSRFToken': csrfToken},
+        success: function (result) {
+            console.log(result);
+            let blob = new Blob([result], {type: 'text/plain'});
+            window.location = URL.createObjectURL(blob);
+        },
+        error: function () {
+            exportFail();
+        }
+    });
 }
 
 function exportToSpotify() {
     // TODO
+}
+
+function exportFail() {
+    // TODO
+    console.log('export failed');
 }
 
 function downloadTrack(track) {
