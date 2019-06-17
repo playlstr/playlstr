@@ -28,8 +28,7 @@ function importSpotifyUrl() {
 
 function spotifyImportComplete(data) {
     console.log(data);
-    url = 'http://' + window.location.host + '/list/' + data;
-    window.location = url;
+    window.location = 'http://' + window.location.host + '/list/' + data;
 }
 
 function spotifyImportFail(data) {
@@ -37,7 +36,6 @@ function spotifyImportFail(data) {
 }
 
 function importPlaylistFile(fileInput) {
-    console.log('importing');
     let reader = new FileReader();
     if (!fileInput.files) return;
     let file = fileInput.files[0];
@@ -58,7 +56,6 @@ function sendPlaylistImportRequest(callback) {
         success: spotifyImportComplete,
         dataType: 'text'
     });
-
 }
 
 function localImportFail(error) {

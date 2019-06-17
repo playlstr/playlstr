@@ -5,9 +5,9 @@
 - Import local playlists using local audio file metadata with the desktop client
 - Upload local playlist files to import (using filenames to try to find matching tracks)
 - Export playlists as text files of tracks
+- Easily add entire albums to playlists
 ### Planned features
 Ordered approximately by expected implementation date (soonest first)
-- Easily add/remove entire albums and artists to/from playlists
 - Export playlists to streaming services
 - Import playlists from other streaming services
 - Granular playlist exporting
@@ -22,7 +22,7 @@ Ordered approximately by expected implementation date (soonest first)
 - Create a PostgreSQL user and database for playlstr and update DATABASES in `playlstr/settings.py` accordingly
     - To use default DATABASES:
         - `CREATE DATABASE playlstr;`
-        - `CREATE USER playlstruser WITH PASSWORD playlstrpassword;`
+        - `CREATE USER playlstruser WITH PASSWORD "playlstrpassword";`
         - `GRANT ALL PRIVILEGES ON DATABASE playlstr TO playlstruser;`
     - Note that in order to run tests you will need to `ALTER USER [username] CREATEDB;` so the testing database can be created
 - `python manage.py makemigrations playlstr` and `python manage.py migrate`

@@ -1,23 +1,18 @@
-let newTracks = [];
 let spotifyResults = [];
 let deletedTracks = [];
+let newTracks = [];
 let newSpotifyTracks = [];
 let advancedSearch = false;
 let trackSearch = false;
 let lastTrackSearchTime = new Date();
 let spotifySearches = 0;
 const spotifyResultsLimit = 20;
+let albumSearch = false;
 
-String.prototype.format = String.prototype.f = function () {
-    let s = this,
-        i = arguments.length;
-
-    while (i--) {
-        s = s.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i]);
-    }
-    return s;
-};
-
+/**
+ * Remove track from playlist body and add it for deletion on save
+ * @param track_id track id to delete
+ */
 function deleteTrack(track_id) {
     let newIndex = newTracks.indexOf(track_id);
     if (newIndex === -1) {
@@ -67,9 +62,10 @@ function exitEditMode(save = false) {
             success: showUpdateSuccess,
             error: showUpdateFailure
         });
-    } else {
-        $('#editControlButtons').css('margin-bottom', '20px');
     }
+    $('#editControlButtons').css('margin-bottom', '20px');
+    $('#enableTrackSearch').text('Add +').removeClass('btn-secondary').addClass('btn-primary');
+    trackSearch = false;
 }
 
 function init() {
@@ -80,18 +76,29 @@ function init() {
         document.querySelector("#searchDropdownButton").click();
         event.preventDefault();
     });
+    $(document).ready(function () {
+        setSearchTypeFromHtml();
+    });
 }
 
 function initTrackAutocomplete() {
     $('#simpleTrackSearchText').on('input', function () {
         let text = $('#simpleTrackSearchText').val();
         if (text.length <= 2 || Date() - lastTrackSearchTime < 1000) return;
-        getTrackSearchResults(text);
-        lastTrackSearchTime = Date();
+        if (!albumSearch) {
+            getTrackSearchResults(text);
+            lastTrackSearchTime = Date();
+        }
     });
     $('#addSuccessDialog').hide();
 }
 
+/**
+ * Get the tracks matching term from the server
+ * @param term term to search for
+ * @param start index into results from which to start
+ * @param count how many tracks to return
+ */
 function getTrackSearchResults(term, start = 0, count = 0) {
     $.ajax({
         type: 'POST',
@@ -101,7 +108,7 @@ function getTrackSearchResults(term, start = 0, count = 0) {
         success: function (unparsed) {
             let table_body = $('#trackSearchResultsTBody');
             table_body.empty();
-            appendSearchResults(unparsed, table_body);
+            appendTrackSearchResults(unparsed, table_body);
         },
         error: function () {
             getTrackResultsFail();
@@ -109,7 +116,12 @@ function getTrackSearchResults(term, start = 0, count = 0) {
     });
 }
 
-function appendSearchResults(unparsed_results, search_results_div) {
+/**
+ * Append results of server track search to track search results
+ * @param unparsed_results unparsed json array of results
+ * @param search_results_div div to append the tracks to
+ */
+function appendTrackSearchResults(unparsed_results, search_results_div) {
     let results = JSON.parse(unparsed_results);
     if (results.length === 0) {
         $('#noResultsInfo').show();
@@ -124,6 +136,7 @@ function appendSearchResults(unparsed_results, search_results_div) {
 
     }
 }
+
 
 function addTrack(track_id, title, artist, album) {
     newTracks.push(track_id);
@@ -166,18 +179,31 @@ function getTrackResultsFail(data) {
     console.log('failed to get spotify results');
 }
 
+/**
+ * Search for current search text on Spotify and update track search results accordingly
+ * Should only be called once per search term
+ */
 function searchSpotify() {
     let query = advancedSearch ? null : $('#simpleTrackSearchText').val();
     $.ajax({
         type: 'GET',
         url: 'https://api.spotify.com/v1/search',
         headers: {'Authorization': 'Bearer ' + spotifyAccessToken},
-        data: {'q': query, 'type': 'track,artist', 'include_external': 'audio', 'limit': spotifyResultsLimit},
+        data: {
+            'q': query,
+            'type': albumSearch ? 'album' : 'track',
+            'include_external': 'audio',
+            'limit': spotifyResultsLimit
+        },
         success: function (data) {
             spotifySearches = 1;
             let table_body = $('#trackSearchResultsTBody');
             table_body.empty();
-            appendSpotifySearchResults(advancedSearch ? null : data['tracks']['items'], table_body);
+            if (albumSearch) {
+                appendSpotifyAlbumSearchResults(advancedSearch ? null : data['albums']['items'], table_body);
+            } else {
+                appendSpotifyTrackSearchResults(advancedSearch ? null : data['tracks']['items'], table_body);
+            }
         },
         error: function () {
             getTrackResultsFail();
@@ -185,6 +211,10 @@ function searchSpotify() {
     });
 }
 
+/**
+ * Get more results from spotify and append them to the current track search results
+ * Should only be called after searchSpotify() has been called once
+ */
 function searchSpotifyAgain() {
     let query = advancedSearch ? null : $('#simpleTrackSearchText').val();
     $.ajax({
@@ -193,14 +223,19 @@ function searchSpotifyAgain() {
         headers: {'Authorization': 'Bearer ' + spotifyAccessToken},
         data: {
             'q': query,
-            'type': 'track,artist',
+            'type': albumSearch ? 'album' : 'track',
             'include_external': 'audio',
             'limit': spotifyResultsLimit,
             'offset': spotifySearches * spotifyResultsLimit
         },
         success: function (data) {
+            spotifySearches++;
             let table_body = $('#trackSearchResultsTBody');
-            appendSpotifySearchResults(advancedSearch ? null : data['tracks']['items'], table_body);
+            if (albumSearch) {
+                appendSpotifyAlbumSearchResults(advancedSearch ? null : data['albums']['items'], table_body);
+            } else {
+                appendSpotifyTrackSearchResults(advancedSearch ? null : data['tracks']['items'], table_body);
+            }
         },
         error: function () {
             getTrackResultsFail();
@@ -208,7 +243,7 @@ function searchSpotifyAgain() {
     });
 }
 
-function appendSpotifySearchResults(tracks, table_body) {
+function appendSpotifyTrackSearchResults(tracks, table_body) {
     if (tracks.length === 0) {
         $('#noResultsInfo').show();
     } else {
@@ -225,15 +260,33 @@ function appendSpotifySearchResults(tracks, table_body) {
     }
 }
 
+function appendSpotifyAlbumSearchResults(albums, table_body) {
+    if (albums.length === 0) {
+        $('#noResultsInfo').show();
+    } else {
+        $('#noResultsInfo').hide();
+        for (let i = 0; i < albums.length; i++) {
+            spotifyResults.push(albums[i]);
+            let album = albums[i];
+            let new_row = '<tr class="track-search-results" id="{0}search"><td>{1}</td><td>{2}</td><td><button class="btn btn-primary" onclick="addSpotifyAlbum(\'{0}\');">+</button></td></tr>'.format(
+                album.id, album.name, album.artists[0].name);
+            $(table_body).append(new_row);
+        }
+        $('#moreSpotifyResults').remove();
+        $(table_body).append('<tr id="moreSpotifyResults"><td colspan="3"><center><a href="#" onclick="searchSpotifyAgain(); return false;">More...</a></center></td></tr>');
+    }
+
+}
+
 function toggleTrackSearch() {
     if (trackSearch) {
         $('#addTrackContainer').hide();
-        $('#enableTrackSearch').text('Add Tracks +').removeClass('btn-secondary').addClass('btn-primary');
+        $('#enableTrackSearch').text('Add +').removeClass('btn-secondary').addClass('btn-primary');
         $('#editControlButtons').css('margin-bottom', '20px');
         trackSearch = false;
     } else {
         $('#addTrackContainer').show();
-        $('#enableTrackSearch').text('Add Tracks -').removeClass('btn-primary').addClass('btn-secondary');
+        $('#enableTrackSearch').text('Add -').removeClass('btn-primary').addClass('btn-secondary');
         $('#editControlButtons').css('margin-bottom', '0px');
         trackSearch = true;
     }
@@ -261,13 +314,14 @@ function deleteNewSpotifyTrack(spotify_id) {
 
 function showNewTrackDialog() {
     // TODO
+    console.log("new");
 }
 
 function exportAsText() {
     // TODO
     $.ajax({
         type: 'GET',
-        url: 'http://{0}/export/text/'.format(window.location.host),
+        url: 'http://' + window.location.host + '/export/text/',
         data: {'playlist_id': playlist_id},
         headers: {'X-CSRFToken': csrfToken},
         success: function (result) {
@@ -303,4 +357,64 @@ function searchDefault() {
 
 function searchPlaylstr() {
     // TODO
+}
+
+function setSearchTypeFromHtml() {
+    let select = document.getElementById('searchTypeSelect');
+    switch (select.options[select.selectedIndex].value) {
+        case 'track':
+            setSearchTypeTrack();
+            break;
+        case 'album':
+            setSearchTypeAlbum();
+            break;
+        default:
+            console.log('Invalid search type selected');
+            return;
+    }
+}
+
+function setSearchTypeTrack() {
+    albumSearch = false;
+    $('#searchTitleColumn').show();
+}
+
+function setSearchTypeAlbum() {
+    albumSearch = true;
+    $('#searchTitleColumn').hide();
+}
+
+function addSpotifyAlbum(spotify_id) {
+    // TODO
+    console.log(spotify_id);
+    $.ajax({
+        type: 'GET',
+        url: 'https://api.spotify.com/v1/albums/' + spotify_id,
+        headers: {'Authorization': 'Bearer ' + spotifyAccessToken},
+        success: function (unparsed) {
+            appendSpotifyAlbumTracks(unparsed);
+        },
+        error: function (data) {
+            console.log(data);
+            console.log('error adding album {}'.format(spotify_id));
+        }
+    });
+}
+
+function appendSpotifyAlbumTracks(unparsed_album) {
+    let album = unparsed_album;
+    if (album.tracks.items.length === 0) return;
+    // TODO support multiple pages of tracks
+    let trackHtml = '';
+    for (let i = 0; i < album.tracks.items.length; i++) {
+        let track = album.tracks.items[i];
+        // Check if track is already in the playlist
+        if (document.getElementById(track.id) !== null || document.getElementById(track.id + 'SpotifyButton') !== null) continue;
+        newSpotifyTracks.push(track.id);
+        trackHtml += '<tr class="spotify-track" id="newTrack{0}"><td>{1}</td><td>{2}</td><td>{3}</td><td><i class="fa fa-certificate text-warning" ></i></td><td class="rm-btn-container" style="display: block;"><button type="button" class="btn btn-outline-danger" onclick="deleteNewSpotifyTrack(\'{0}\');">&#10060;</button></td></tr>'.format(track.id, track.name, track.artists[0].name, album.name);
+        $('#newTracksWarning').show();
+    }
+    $('#trackListTBody').append(trackHtml);
+    showAddSuccess();
+
 }

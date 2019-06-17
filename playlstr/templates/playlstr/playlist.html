@@ -31,7 +31,7 @@
                                 </button>
                                 <button id="enableTrackSearch" type="button" class="btn btn-primary btn-padding-h"
                                         onclick="toggleTrackSearch();">
-                                    Add Tracks +
+                                    Add +
                                 </button>
                             </div>
                         {% endif %}
@@ -54,13 +54,14 @@
                          id="addSuccessDialog">
                         Added!
                     </div>
-                    <div id="searchContainer" class="form-inline">
+                    <div id="searchContainer" class="form-inline" style="margin-top: 20px;">
                         <div id="trackSearchInputs" style="width: 70%;">
                             <div id="simpleTrackSearch" class="form-inline">
                                 <input type="text" id="simpleTrackSearchText" name="simpleTrackSearchText"
                                        style="width: 100%;"
                                        class="form-control">
                             </div>
+                            <!--
                             <div id="advancedTrackSearch" style="display: none; width: 100%;">
                                 <form id="advancedTrackSearchForm" class="form-inline">
                                     <label for="aTrackSearchTitle">Title: </label>
@@ -72,7 +73,7 @@
                                     <input type="text" class="form-control" id="aTrackSearchAlbum" style="margin: 5px;">
                                 </form>
                             </div>
-
+                            -->
                         </div>
                         <div class="dropdown btn-padding-h dropdown-hover" style="margin-left: 10px;"
                              id="searchDropdown">
@@ -87,10 +88,18 @@
                                 <a class="dropdown-item" href="#" onclick="searchPlaylstr();return false;">Playlstr</a>
                             </div>
                         </div>
+                        <div id="searchTypeSelectContainer">
+                            <select class="custom-select" id="searchTypeSelect" onchange="setSearchTypeFromHtml();">
+                                <option selected value="track">Tracks</option>
+                                <option value="album">Albums</option>
+                            </select>
+                        </div>
+                        <!--
                         <button type="button" class="btn btn-primary btn-padding-h vmargin-sm"
                                 onclick="toggleAdvancedTrackSearch();">
                             Advanced
                         </button>
+                        -->
                         <button id="manualAddButton" type="button" class="btn btn-primary btn-padding-h"
                                 onclick="showNewTrackDialog()">
                             +
@@ -101,7 +110,7 @@
                     <table class="table table-striped" id="trackSearchResultsTable">
                         <thead>
                         <tr>
-                            <th>Title</th>
+                            <th id="searchTitleColumn">Title</th>
                             <th>Artist</th>
                             <th>Album</th>
                             <th>Add</th>
@@ -110,7 +119,7 @@
                         <tbody id="trackSearchResultsTBody">
                         </tbody>
                     </table>
-                    <div id="noResultsInfo" style="padding-left: 10px;">No matching tracks. Try searching a different
+                    <div id="noResultsInfo" style="padding-left: 10px;">No matching results. Try searching a different
                         site with the search button above.
                     </div>
                 </div>
@@ -145,7 +154,7 @@
                                 <i class="fa fa-play"></i>
                             </button>
                             {% if track.spotify_id is not None %}
-                                <button type="button" class="btn btn-success"
+                                <button id="{{ track.spotify_id }}SpotifyButton" type="button" class="btn btn-success"
                                         onclick="window.location = 'https://open.spotify.com/track/{{ track.spotify_id }}';">
                                     <i class="fa fa-spotify"></i>
                                 </button>
