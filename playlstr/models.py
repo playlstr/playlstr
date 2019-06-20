@@ -36,8 +36,9 @@ class Track(models.Model):
     release_date = models.DateField(default=None, blank=True, null=True)
     image_url = models.CharField(max_length=512, default=None, blank=True, null=True)
     duration = models.IntegerField(default=None, blank=True, null=True)
-    genres = ArrayField(models.CharField(max_length=20, blank=False, null=False), null=True)
+    genres = ArrayField(models.CharField(max_length=20, blank=False, null=False), null=True, blank=True)
     album_release = models.CharField(max_length=64, blank=True, null=True, unique=True)
+    explicit = models.BooleanField(default=False)
     source = models.SmallIntegerField(
         choices=(
             (0, "Manual"),

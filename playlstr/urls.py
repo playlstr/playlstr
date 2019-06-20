@@ -35,7 +35,6 @@ urlpatterns = [
     path('client-import/', views.client_import, name='client_import'),
     path('local-import/', views.local_file_import, name='local_import'),
     path('spotify-redirect/', views.spotify_login_redirect, name='spotify_redirect'),
-    path('export/', include([
-        path('text/', views.text_file_export, name='export_text')
-    ]))
+    path('export/<int:playlist_id>/', views.export_playlist, name='export_playlist'),
+    path('file-export/', views.file_export, name='file_export')
 ]

@@ -36,16 +36,10 @@
                             </div>
                         {% endif %}
                     {% endif %}
-                    <div class="dropdown" style="margin-left: 10px;">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdownButton"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Export
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="exportDropdownButton">
-                            <a class="dropdown-item" href="#" onclick="exportAsText();return false;">Text</a>
-                            <a class="dropdown-item" href="#" onclick="exportToSpotify();return false;">Spotify</a>
-                        </div>
-                    </div>
+                    <button class="btn btn-primary btn-padding-h" type="button" id="exportButton"
+                            onclick="window.location.href = 'http://' + window.location.host + '/export/{{ playlist.playlist_id }}';">
+                        Export
+                    </button>
                 </div>
             </div>
             <div id="addTrackContainer" style="display:none;margin-bottom: 20px;">

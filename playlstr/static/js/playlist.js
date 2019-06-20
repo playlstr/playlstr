@@ -317,33 +317,6 @@ function showNewTrackDialog() {
     console.log("new");
 }
 
-function exportAsText() {
-    // TODO
-    $.ajax({
-        type: 'GET',
-        url: 'http://' + window.location.host + '/export/text/',
-        data: {'playlist_id': playlist_id},
-        headers: {'X-CSRFToken': csrfToken},
-        success: function (result) {
-            console.log(result);
-            let blob = new Blob([result], {type: 'text/plain'});
-            window.location = URL.createObjectURL(blob);
-        },
-        error: function () {
-            exportFail();
-        }
-    });
-}
-
-function exportToSpotify() {
-    // TODO
-}
-
-function exportFail() {
-    // TODO
-    console.log('export failed');
-}
-
 function downloadTrack(track) {
     // TODO
 }

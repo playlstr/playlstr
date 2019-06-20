@@ -1,0 +1,42 @@
+{% extends 'playlstr/base.html' %}
+{% load static %}
+{% block head %}
+    <title>Playlist</title>
+    <script src="{% static 'js/export.js' %}"></script>
+{% endblock %}
+{% block content %}
+    {% if playlist %}
+        <script>
+            let playlist_id = {{ playlist.playlist_id }};
+        </script>
+        <h1 style="padding: 50px;" class="text-center" id="playlistName">{{ playlist.name }}</h1>
+        <form>
+            {% if genres %}
+                <div id="genresGroup" class="form-group">
+                    {% for genre in genres %}
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input genre-select" type="checkbox" id="{{ genre }}">
+                            <label class="form-check-label" for="{{ genre }}">{{ genre }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div id="explicitGroup" class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="explicitCheck"
+                           {% if not explicit %}disabled{% endif %}>
+                    <label class="form-check-label" for="defaultCheck1">
+                        Include explicit tracks {% if not explicit %}(no explicit tracks in this playlist){% endif %}
+                    </label>
+                </div>
+            </div>
+            <div id="exportButtons" class="form-group">
+                <button id="exportAsTextButton" type="button" class="btn btn-primary" onclick="exportAsText();">Export as Text
+                </button>
+            </div>
+        </form>
+    {% else %}
+        Invalid playlist
+    {% endif %}
+{% endblock %}
+

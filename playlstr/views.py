@@ -109,20 +109,49 @@ def local_file_import(request):
     return HttpResponse(status=400, reason='Malformed or empty playlist') if result == 'fail' else HttpResponse(result)
 
 
-def text_file_export(request):
+def file_export(request):
     if not request.user.is_authenticated:
         return HttpResponse('Unauthorized', status=401)
-    try:
-        result = export_playlist_text(request.GET['playlist_id'])
-        if result == 'invalid':
-            raise KeyError
-    except KeyError:
+    if 'playlist_id' not in request.POST:
         return HttpResponse('Invalid', status=400)
-    return HttpResponse(result, content_type='text/plain')
+    try:
+        name = Playlist.objects.get(playlist_id=request.POST['playlist_id']).name
+    except ObjectDoesNotExist:
+        return HttpResponse('Invalid', status=400)
+    if request.POST.get('criteria'):
+        tracks = tracks_matching_criteria(request.POST['playlist_id'], json.loads(request.POST['criteria']))
+    else:
+        tracks = PlaylistTrack.objects.filter(playlist=request.POST['playlist_id']).values('track')
+    try:
+        if 'filetype' in request.POST:
+            if request.POST['filetype'] == 'm3u':
+                return HttpResponse(export_as_m3u(name, tracks), content_type='application/octet-stream', status=200)
+            else:
+                return HttpResponse(export_as_text(name, tracks), content_type='text/plain')
+        else:
+            return HttpResponse(export_as_text(name, tracks), content_type='text/plain')
+    except ValueError:
+        return HttpResponse('Invalid', status=400)
 
 
 def spotify_login_redirect(request):
     return render(request, 'playlstr/spotify_redirect.html')
+
+
+def export_playlist(request, playlist_id):
+    tracks = [pt.track for pt in PlaylistTrack.objects.filter(playlist_id=playlist_id)]
+    genres = set()
+    explicit = False
+    for track in tracks:
+        if track.explicit:
+            explicit = True
+        if track.genres is not None:
+            for genre in track.genres:
+                genres.add(genre)
+    return render(request, 'playlstr/export.html', {'playlist': Playlist.objects.get(playlist_id=playlist_id),
+                                                    'genres': list(genres),
+                                                    'explicit': explicit
+                                                    })
 
 
 @csrf_exempt
