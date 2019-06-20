@@ -20,11 +20,15 @@ def tracks_matching_criteria(playlist_id: int, criteria: dict) -> list:
         raise ValueError
     tracks = PlaylistTrack.objects.filter(playlist=playlist).values_list('track', flat=True)
     query = Q(track_id__in=tracks)
-    if criteria.get('excluded_genres'):
-        exclude_query = Q()
+    if 'excluded_genres' in criteria:
         for genre in criteria['excluded_genres']:
-            exclude_query &= ~Q(genres__icontains=genre)
-        query &= exclude_query
+            query &= ~Q(genres__icontains=genre)
+    if 'excluded_artists' in criteria:
+        for artist in criteria['excluded_artists']:
+            query &= ~Q(artist=artist)
+    if 'excluded_albums' in criteria:
+        for album in criteria['excluded_albums']:
+            query &= ~Q(album=album)
     if 'explicit' in criteria and not criteria['explicit']:
         query &= Q(explicit=False)
     return Track.objects.filter(query)

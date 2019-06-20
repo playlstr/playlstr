@@ -1,5 +1,47 @@
+let excludedArtists = [];
+let excludedAlbums = [];
+
+function excludeSelectedAlbum() {
+    let option = $('#albumExcludeSelect').children('option:selected');
+    if (option === $('#albumExcludeSelect:first-child')) return; // Default 'Choose...' element isn't an album
+    excludedAlbums.push(option.val());
+    option.remove();
+    let id = option.val().replace(' ', '_');
+    $('#excludedAlbums').append('<div id="{0}" class="form-inline">{1}<button onclick="removeExcludedAlbum(\'{1}\');" type="button" class="btn btn-outline-danger">X</button></div>'.format(id, option.val()));
+}
+
+function removeExcludedAlbum(album) {
+    let index = excludedAlbums.indexOf(album);
+    if (index === -1) return;
+    $('#' + album.replace(' ', '_')).remove();
+    excludedAlbums.splice(index, 1);
+    $('#albumExcludeSelect').append($(new Option(album, album)).html(album));
+}
+
+function excludeSelectedArtist() {
+    let option = $('#artistExcludeSelect').children('option:selected');
+    if (option === $('#artistExcludeSelect:first-child')) return; // Default 'Choose...' element isn't an artist
+    excludedArtists.push(option.val());
+    option.remove();
+    let id = option.val().replace(' ', '_');
+    $('#excludedArtists').append('<div id="{0}" class="form-inline">{1}<button onclick="removeExcludedArtist(\'{1}\');" type="button" class="btn btn-outline-danger">X</button></div>'.format(id, option.val()));
+}
+
+function removeExcludedArtist(artist) {
+    let index = excludedArtists.indexOf(artist);
+    if (index === -1) return;
+    $('#' + artist.replace(' ', '_')).remove();
+    excludedArtists.splice(index, 1);
+    $('#artistExcludeSelect').append($(new Option(artist, artist)).html(artist));
+}
+
 function exportAsText() {
-    let criteria = JSON.stringify({'excluded_genres': getExcludedGenres(), 'explicit': $('#explicitCheck').is(':checked')});
+    let criteria = JSON.stringify({
+        'excluded_genres': getExcludedGenres(),
+        'explicit': $('#explicitCheck').is(':checked'),
+        'excluded_artists': excludedArtists,
+        'excluded_albums': excludedAlbums
+    });
     $.ajax({
         type: 'POST',
         url: 'http://' + window.location.host + '/file-export/',

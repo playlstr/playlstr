@@ -13,12 +13,45 @@
         <form>
             {% if genres %}
                 <div id="genresGroup" class="form-group">
+                    Excluded genres:&nbsp;
                     {% for genre in genres %}
                         <div class="form-check form-check-inline">
                             <input class="form-check-input genre-select" type="checkbox" id="{{ genre }}">
                             <label class="form-check-label" for="{{ genre }}">{{ genre }}</label>
                         </div>
                     {% endfor %}
+                </div>
+            {% endif %}
+            {% if artists %}
+                <div id="artistsGroup" class="form-group">
+                    Excluded artists:&nbsp;
+                    <select id="artistExcludeSelect">
+                        <option value="default">Choose...</option>
+                        {% for artist in artists %}
+                            <option value="{{ artist }}" id="{{ artist }}Exclude">{{ artist }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="excludeSelectedArtist();" class="btn btn-danger btn-padding-h">
+                        Exclude
+                    </button>
+                    <div id="excludedArtists">
+                    </div>
+                </div>
+            {% endif %}
+            {% if albums %}
+                <div id="albumsGroup" class="form-group">
+                    Excluded albums:&nbsp;
+                    <select id="albumExcludeSelect">
+                        <option value="default">Choose...</option>
+                        {% for album in albums %}
+                            <option value="{{ album }}" id="{{ album }}Exclude">{{ album }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="excludeSelectedAlbum();" class="btn btn-danger btn-padding-h">
+                        Exclude
+                    </button>
+                    <div id="excludedAlbums">
+                    </div>
                 </div>
             {% endif %}
             <div id="explicitGroup" class="form-group">
@@ -31,7 +64,8 @@
                 </div>
             </div>
             <div id="exportButtons" class="form-group">
-                <button id="exportAsTextButton" type="button" class="btn btn-primary" onclick="exportAsText();">Export as Text
+                <button id="exportAsTextButton" type="button" class="btn btn-primary" onclick="exportAsText();">Export
+                    as Text
                 </button>
             </div>
         </form>

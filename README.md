@@ -6,12 +6,12 @@
 - Upload local playlist files to import (using filenames to try to find matching tracks)
 - Export playlists as text files of tracks
 - Easily add entire albums to playlists
+- Granular playlist exporting
+    - Exclude specific genres, albums, or artists or explicit tracks
 ### Planned features
 Ordered approximately by expected implementation date (soonest first)
 - Export playlists to streaming services
 - Import playlists from other streaming services
-- Granular playlist exporting
-    - Exclude specific genres, albums, or artists or explicit tracks
 - Build up playlists from other playlists ("sublists")
     - For example, you may have a Downtempo sublist which is included in your Fav Tracks playlist. You want to share your Fav Tracks playlist with a friend but keep it upbeat, so simply deselect Downtempo when exporting to get all tracks in Fav Tracks that aren't in Downtempo.
 - Export playlists using local music files

@@ -9,7 +9,6 @@ String.prototype.format = String.prototype.f = function () {
 };
 
 
-
 function createPlaylist() {
     $('#createPlaylistFail').hide();
     let location = 'http://' + window.location.host.toString() + '/';

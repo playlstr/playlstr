@@ -141,6 +141,8 @@ def spotify_login_redirect(request):
 def export_playlist(request, playlist_id):
     tracks = [pt.track for pt in PlaylistTrack.objects.filter(playlist_id=playlist_id)]
     genres = set()
+    albums = set()
+    artists = set()
     explicit = False
     for track in tracks:
         if track.explicit:
@@ -148,9 +150,13 @@ def export_playlist(request, playlist_id):
         if track.genres is not None:
             for genre in track.genres:
                 genres.add(genre)
+        albums.add(track.album)
+        artists.add(track.artist)
     return render(request, 'playlstr/export.html', {'playlist': Playlist.objects.get(playlist_id=playlist_id),
                                                     'genres': list(genres),
-                                                    'explicit': explicit
+                                                    'explicit': explicit,
+                                                    'albums': list(albums),
+                                                    'artists': list(artists)
                                                     })
 
 
