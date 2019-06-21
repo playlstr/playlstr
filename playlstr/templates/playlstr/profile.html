@@ -1,0 +1,42 @@
+{% extends 'playlstr/base.html' %}
+{% load static %}
+{% block head %}
+    <title>{{ username }}</title>
+{% endblock %}
+{% block content %}
+    <div id="userInfo" class="centered bg-light">
+        <h3>{{ username }}</h3>
+        {% if my_profile %}
+            {{ user.email }}<br>
+            {{ user.first_name }} {{ user.last_name }}
+        {% endif %}
+    </div>
+    <div id="ownedPlaylists" class="vmargin-sm">
+        <ul class="list-group">
+            <li class="nav-header list-group-item h3 centered" style="border: none;">Playlists</li>
+            {% if owned_playlists %}
+                {% for playlist in owned_playlists %}
+                    <li class="list-group-item centered"><a
+                            href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item centered">No playlists</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% if user.is_authenticated %} {% if my_profile or editable_playlists|length > 0 %}
+        <div id="editablePlaylists" class="vmargin-sm">
+            <ul class="list-group">
+                <li class="nav-header list-group-item h3 centered" style="border: none;">Editable Playlists</li>
+                {% if editable_playlists %}
+                    {% for playlist in editable_playlists %}
+                        <li class="list-group-item centered"><a
+                                href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+                    {% endfor %}
+                {% else %}
+                    <li class="list-group-item centered">No playlists</li>
+                {% endif %}
+            </ul>
+        </div>
+    {% endif %} {% endif %}
+{% endblock %}

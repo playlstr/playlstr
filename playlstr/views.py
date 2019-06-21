@@ -160,6 +160,21 @@ def export_playlist(request, playlist_id):
                                                     })
 
 
+def my_profile(request):
+    if not request.user or not request.user.is_authenticated:
+        return HttpResponse('Not logged in', status=404)
+    return redirect('/profile/{}/'.format(request.user.id))
+
+
+def profile(request, user_id):
+    user = PlaylstrUser.objects.get(id=user_id)
+    show_all = request.user == user
+    owned = Playlist.objects.filter(owner=user_id) if show_all else Playlist.objects.filter(owner=user_id, privacy=0)
+    return render(request, 'playlstr/profile.html',
+                  {'username': user.get_username(), 'my_profile': show_all, 'owned_playlists': owned.all(),
+                   'editable_playlists': Playlist.objects.filter(editors__id=user_id).all()})
+
+
 @csrf_exempt
 def client_import(request):
     try:
