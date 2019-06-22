@@ -175,6 +175,22 @@ def profile(request, user_id):
                    'editable_playlists': Playlist.objects.filter(editors__id=user_id).all()})
 
 
+def fork_playlist(request, playlist_id):
+    if not request.user.is_authenticated:
+        return HttpResponse('Not logged in', status=403)
+    try:
+        old_list = Playlist.objects.get(playlist_id=playlist_id)
+    except ObjectDoesNotExist:
+        return HttpResponse('Invalid playlist', status=401)
+    new_list = Playlist.objects.create(name='Fork of {}'.format(old_list.name), forked_from=old_list,
+                                       owner=request.user)
+    idx = 0
+    for ctrack in [pt.track for pt in PlaylistTrack.objects.filter(playlist=old_list).all()]:
+        PlaylistTrack.objects.create(playlist=new_list, track=ctrack, index=idx)
+        idx += 1
+    return redirect(new_list.get_absolute_url())
+
+
 @csrf_exempt
 def client_import(request):
     try:

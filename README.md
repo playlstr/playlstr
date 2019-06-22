@@ -28,11 +28,17 @@ Ordered approximately by expected implementation date (soonest first)
     - Note that in order to run tests you will need to `ALTER USER [username] CREATEDB;` so the testing database can be created
 - `python manage.py makemigrations playlstr` and `python manage.py migrate`
 - Set up API keys and add them to `playlstr/apikeys.py`
-    - Spotify
-        - Add `domain/spotify-redirect/` to Redirect URIs in the Spotify API dashboard
-        - `SPOTIFY_CLIENT_ID = '[your Spotify client id]'`
-        - `SPOTIFY_CLIENT_SECRET = '[your Spotify client secret]'`
-    - Google
-        - `SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '[your Google oauth api key]'`
-        - `SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '[your Google oauth api secret]'`
+    - [Spotify](https://developer.spotify.com/dashboard/)
+        - Add `[domain]/spotify-redirect/` to Redirect URIs in the Spotify API dashboard, then
+        
+        - ```python
+          SPOTIFY_CLIENT_ID = '[your Spotify client id]'
+          SPOTIFY_CLIENT_SECRET = '[your Spotify client secret]'
+          ```
+           
+    - [ Google API](https://console.developers.google.com/apis/)
+        - ```python 
+          SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '[your Google oauth api key]'
+          SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '[your Google oauth api secret]'
+          ```
 

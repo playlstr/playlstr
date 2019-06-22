@@ -88,6 +88,7 @@ class Playlist(models.Model):
             (2, "Private")  # Only shows up to owner/editors
         ), default=0, null=False
     )
+    forked_from = models.ForeignKey("self", blank=True, null=True, on_delete=models.SET_NULL)
     # Creator of this playlist
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='owner')
@@ -98,9 +99,7 @@ class Playlist(models.Model):
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True)
 
     def get_absolute_url(self):
-        url = '/list/{}/'.format(self.playlist_id)
-        print('loading url {}'.format(url))
-        return url
+        return '/list/{}/'.format(self.playlist_id)
 
 
 class PlaylistTrack(models.Model):

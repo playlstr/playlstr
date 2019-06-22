@@ -5,7 +5,19 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
     <title>Redirecting...</title>
-    <script src="{% static 'js/spotify.js' %}" onload="redirectToPreauthUrl();"></script>
+    <script type="text/javascript">
+        let csrfToken = '{{ csrf_token }}';
+
+        function postAuthRedirect() {
+            {% if user.is_authenticated %}
+                parseSpotifyAccessTokenFromLocationLoggedIn(true);
+            {% else %}
+                parseSpotifyAccessTokenFromLocationLoggedOut();
+                redirectToPreauthUrl();
+            {% endif %}
+        }
+    </script>
+    <script src="{% static 'js/spotify.js' %}" onload="postAuthRedirect();"></script>
 </head>
 <body>
 </body>

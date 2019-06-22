@@ -7,12 +7,15 @@ function hideSpotifyAuth() {
     });
 }
 
-function getNewAccessTokenLoggedIn() {
+function getNewAccessTokenLoggedIn(redirect = false) {
     $.ajax({
         type: 'GET',
         url: 'http://' + window.location.host + '/get-spotify-token/',
         headers: {'X-CSRFToken': csrfToken},
-        success: parseUserSpotifyToken
+        success: function (data) {
+            parseUserSpotifyToken(data);
+            if (redirect) redirectToPreauthUrl();
+        }
     });
 }
 
@@ -43,7 +46,7 @@ function loadSpotifyAccessToken() {
     hideSpotifyAuth();
 }
 
-function parseSpotifyAccessTokenFromLocationLoggedIn() {
+function parseSpotifyAccessTokenFromLocationLoggedIn(redirect = false) {
     let location = document.location.toString();
     let access_token_start = location.indexOf('?code=') + 6;
     if (access_token_start === 5 /* -1 + 6 */) {
@@ -60,9 +63,8 @@ function parseSpotifyAccessTokenFromLocationLoggedIn() {
             'code': token,
             'redirect_uri': location.substring(0, access_token_start - 6)
         },
-        success: getNewAccessTokenLoggedIn(),
+        success: getNewAccessTokenLoggedIn(redirect)
     });
-    document.location.hash = '';
 }
 
 function parseSpotifyAccessTokenFromLocationLoggedOut() {
@@ -79,7 +81,6 @@ function parseSpotifyAccessTokenFromLocationLoggedOut() {
     let expiryDate = new Date();
     expiryDate.setSeconds(expiryDate.getSeconds() + parseInt(location.substring(expiry_start, expiry_end)) - 5);
     document.cookie = 'spotify-token=' + token + '; expires=' + expiryDate.toString() + '; path=/';
-    document.location.hash = '';
     hideSpotifyAuth();
 }
 
@@ -101,30 +102,24 @@ function redirectToPreauthUrl() {
     }
     // Redirect URI should always be the last part of state
     let new_url = state.substring(new_url_start, state_end);
-    console.log(new_url);
     location = location.replace(new_url, '');
-    let hash = location.indexOf('#');
-    if (hash === -1) {
-        console.log('Passing no query string to redirect url');
-        window.location.href = new_url;
-        return;
-    }
     let redirect = decodeURIComponent(new_url);
     if (redirect[redirect.length - 1] !== '/') {
         redirect += '/';
     }
-    redirect += location.substring(hash, location.indexOf('_redirect_'));
+    let hash = location.indexOf('#');
+    if (hash !== -1) redirect += location.substring(hash, location.indexOf('_redirect_'));
     window.location.href = redirect;
 }
 
 function spotifyAuthLoggedOut() {
     state += '_redirect_' + window.location;
-    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + SPOTIFY_REDIRECT_URI + (state === '' ? '' : '&state=' + state);
+    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=token&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + SPOTIFY_REDIRECT_URI + '&state=' + state;
 }
 
 function spotifyAuthLoggedIn() {
     state += '_redirect_' + window.location;
-    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=code&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + SPOTIFY_REDIRECT_URI + (state === '' ? '' : '&state=' + state);
+    window.location.href = 'https://accounts.spotify.com/authorize?client_id=c39c475f390546a1832482a02c4aa36a&response_type=code&scope=playlist-modify-public%20playlist-read-private%20playlist-read%20playlist-read-collaborative&redirect_uri=' + SPOTIFY_REDIRECT_URI + '&state=' + state;
 }
 
 // https://stackoverflow.com/questions/5639346/what-is-the-shortest-function-for-reading-a-cookie-by-name-in-javascript/25490531#25490531

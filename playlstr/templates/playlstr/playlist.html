@@ -14,11 +14,11 @@
         </script>
         <div id="playlist" class="container-fluid">
             <h1 style="padding: 50px;" class="text-center" id="playlistName">{{ playlist.name }}</h1>
-            <div id="playlistButtons" class="container-fluid">
-                <div id="editControlButtons" class="container-fluid row vmargin-sm">
+            <div id="playlistButtons">
+                <div id="editControlButtons" class="row vmargin-sm">
                     {% if user.is_authenticated %}
                         {% if user in playlist.editors or user == playlist.owner %}
-                            <button type="button" class="btn btn-primary form-btn" id="editButton"
+                            <button type="button" class="btn btn-primary btn-padding-h" id="editButton"
                                     onclick="enterEditMode();">
                                 Edit
                             </button>
@@ -40,6 +40,12 @@
                             onclick="window.location.href = 'http://' + window.location.host + '/export/{{ playlist.playlist_id }}';">
                         Export
                     </button>
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-primary btn-padding-h" type="button" id="forkButton"
+                                onclick="window.location.href = 'http://' + window.location.host + '/fork/{{ playlist.playlist_id }}';">
+                            Fork
+                        </button>
+                    {% endif %}
                 </div>
             </div>
             <div id="addTrackContainer" style="display:none;margin-bottom: 20px;">

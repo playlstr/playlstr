@@ -38,5 +38,6 @@ urlpatterns = [
     path('export/<int:playlist_id>/', views.export_playlist, name='export_playlist'),
     path('file-export/', views.file_export, name='file_export'),
     path('me/', views.my_profile, name='my_profile'),
-    path('profile/<int:user_id>/', views.profile, name='profile')
+    path('profile/<int:user_id>/', views.profile, name='profile'),
+    path('fork/<int:playlist_id>/', views.fork_playlist, name='fork_playlist')
 ]
