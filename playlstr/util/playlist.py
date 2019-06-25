@@ -65,7 +65,7 @@ def update_playlist(data: dict) -> str:
     headers = {'Authorization': 'Bearer {}'.format(spotify_token)}
     for track in spotify_ids:
         last_index += 1
-        response = get(base_url + track, headers=headers)
+        response = requests.get(base_url + track, headers=headers)
         track_json = response.json()
         track = track_from_spotify_json(track_json)
         PlaylistTrack.objects.create(playlist=playlist, track=track, index=last_index)

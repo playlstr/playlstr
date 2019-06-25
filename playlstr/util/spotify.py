@@ -1,10 +1,9 @@
 import json
 from base64 import b64encode
 from math import floor
-from re import match
-
 from django.db.models import Q
-from requests import get, post
+import re
+import requests
 
 from playlstr.apikeys import *
 from playlstr.models import *
@@ -18,19 +17,19 @@ def import_spotify(info: dict) -> str:
     """
     url = info['playlist_url']
     # Validate URL
-    if not (isinstance(url, str) and match(r'^http(s?)://open\.spotify\.com/playlist/.{22}/?', url)):
+    if not (isinstance(url, str) and re.match(r'^http(s?)://open\.spotify\.com/playlist/.{22}/?', url)):
         return 'Invalid URL'
     playlist_id = url[-23:0] if url[-1] == '/' else url[-22:]
     query_url = 'https://api.spotify.com/v1/playlists/' + playlist_id
     query_headers = {'Authorization': 'Bearer {}'.format(info['access_token'])}
     # Get/create playlist
-    playlist_json = get(query_url, headers=query_headers).json()
+    playlist_json = requests.get(query_url, headers=query_headers).json()
     playlist = Playlist.objects.get_or_create(spotify_id=playlist_id, owner=info['user'])[0]
     playlist.name = playlist_json['name']
     playlist.last_sync_spotify = timezone.now()
     playlist.save()
     # Get playlist tracks
-    tracks_response = get(query_url + '/tracks', headers=query_headers)
+    tracks_response = requests.get(query_url + '/tracks', headers=query_headers)
     if tracks_response.status_code != 200:
         return tracks_response.reason
     tracks_json = tracks_response.json()
@@ -45,7 +44,7 @@ def import_spotify(info: dict) -> str:
             index += 1
             track = track_from_spotify_json(j['track'])
             PlaylistTrack.objects.create(playlist=playlist, track=track, index=index)
-        tracks_json = get(tracks_json['next'], headers=query_headers).json()
+        tracks_json = requests.get(tracks_json['next'], headers=query_headers).json()
     return playlist.playlist_id
 
 
@@ -91,7 +90,7 @@ def track_from_spotify_json(track_json: dict) -> Track:
 def valid_spotify_token(token: str) -> bool:
     test_url = 'https://api.spotify.com/v1/tracks/11dFghVXANMlKmJXsNCbNl'
     headers = {'Authorization': 'Bearer {}'.format(token)}
-    response = get(test_url, headers=headers)
+    response = requests.get(test_url, headers=headers)
     return response.status_code == 200
 
 
@@ -110,7 +109,7 @@ def update_spotify_token_for_user_with_valid_tokens(user: PlaylstrUser) -> str:
     body = {'grant_type': 'refresh_token', 'refresh_token': user.spotify_refresh_token}
     headers = {'Authorization': 'Basic {}'.format(
         b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
-    response = post('https://accounts.spotify.com/api/token', headers=headers, data=body)
+    response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=body)
     if response.status_code != 200:
         print(response.reason)
         return 'response error'
@@ -139,7 +138,7 @@ def spotify_parse_code(info: dict) -> str:
     headers = {'Authorization': 'Basic {}'.format(
         b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
     body = {'grant_type': 'authorization_code', 'code': data['code'], 'redirect_uri': data['redirect_uri']}
-    response = post('https://accounts.spotify.com/api/token', headers=headers, data=body)
+    response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=body)
     if response.status_code != 200:
         return response.reason
     try:

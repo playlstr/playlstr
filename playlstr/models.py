@@ -52,11 +52,12 @@ class Track(models.Model):
     md5 = models.CharField(max_length=32, blank=True, null=True, unique=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
     # External identifiers
-    spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=True)
-    gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=True)
-    deezer_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=True)
+    spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
+    gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
+    deezer_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
     isrc = models.CharField(max_length=24, default=None, null=True, blank=True, unique=True)
     mb_id = models.CharField(max_length=36, default=None, null=True, blank=True, unique=True)
+    youtube_id = models.CharField(max_length=11, default=None, null=True, blank=True, unique=False)
 
     class Meta:
         constraints = [
