@@ -54,6 +54,7 @@ class Track(models.Model):
     # External identifiers
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
     gplay_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
+    gplay_album_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
     deezer_id = models.CharField(max_length=64, default=None, null=True, blank=True, unique=False)
     isrc = models.CharField(max_length=24, default=None, null=True, blank=True, unique=True)
     mb_id = models.CharField(max_length=36, default=None, null=True, blank=True, unique=True)

@@ -6,6 +6,7 @@ from django.utils.timezone import is_aware, make_aware
 
 from playlstr.models import *
 from playlstr.util.deezer import deezer_single_track_search
+from playlstr.util.gplay import gplay_search
 
 
 def add_track_by_metadata(data: dict) -> Track:
@@ -232,6 +233,27 @@ def match_track_deezer(track: Track, match_title=True, match_album=True, match_a
         if not reqs_matched:
             continue
         track.deezer_id = dtrack['id']
+        track.save()
+        return True
+    return False
+
+
+def match_track_gplay(track: Track, match_title=True, match_artist=True) -> bool:
+    """
+    Find Google Play track matching the track info and update the Track with Google Play IDs
+    :param track: Track to find matching info for
+    :param match_title: whether to require matching track title to update track
+    :param match_artist: whether to require matching track artist to update track
+    :return: whether the track was updated
+    """
+    gplay_tracks = gplay_search('{} {}'.format(track.title, track.artist), 'track')
+    for gtrack in gplay_tracks:
+        if match_title and gtrack['title'] != track.title:
+            continue
+        if match_artist and gtrack['artist'] != track.artist:
+            continue
+        track.gplay_id = gtrack['id']
+        track.gplay_album_id = gtrack['album_id']
         track.save()
         return True
     return False

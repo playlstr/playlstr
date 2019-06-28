@@ -11,7 +11,9 @@
             $(document).ready(function () {
                 // Fix size of Deezer buttons
                 $('.deezerSVG').each(function () {
-                    $(this).attr('width', $(this).parent().prev().width()).attr('height', $(this).parent().prev().height());
+                    if ($(this).parent().prev().prev().is('a')) {
+                        $(this).attr('width', $(this).parent().prev().prev().width()).attr('height', $(this).parent().prev().height());
+                    }
                 });
                 init();
             });
@@ -165,6 +167,12 @@
                                 <a id="{{ track.spotify_id }}SpotifyButton" class="btn spotify btn-padding-h"
                                    href="https://open.spotify.com/track/{{ track.spotify_id }}">
                                     <i class="fa fa-spotify"></i>
+                                </a>
+                            {% endif %}
+                            {% if track.gplay_id is not None and track.gplay_album_id is not None %}
+                                <a id="{{ track.gplay_id }}GplayButton" class="btn gplay-music btn-padding-h"
+                                   href="https://play.google.com/store/music/album?id={{ track.gplay_album_id }}&tid=song-{{ track.gplay_id }}">
+                                    <i class="fa fa-play"></i>
                                 </a>
                             {% endif %}
                             {% if track.deezer_id is not None %}

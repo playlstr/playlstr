@@ -8,7 +8,9 @@
         // Fix size of Deezer button
         $(document).ready(function () {
             $('.deezerSVG').each(function () {
-                $(this).attr('width', $(this).parent().prev().prev().width()).attr('height', $(this).parent().prev().height());
+                if ($(this).parent().prev().prev().is('a')) {
+                    $(this).attr('width', $(this).parent().prev().prev().width()).attr('height', $(this).parent().prev().height());
+                }
             });
         });
     </script>
@@ -27,24 +29,30 @@
                 <i class="fa fa-spotify"></i>
             </a><br>
         {% endif %}
+        {% if track.gplay_id is not None and track.gplay_album_id is not None %}
+            <a id="{{ track.gplay_id }}GplayButton" class="btn btn-lg gplay-music vmargin-sm btn-padding-h"
+               href="https://play.google.com/store/music/album?id={{ track.gplay_album_id }}&tid=song-{{ track.gplay_id }}">
+                <i class="fa fa-play"></i>
+            </a>
+        {% endif %}
         {% if track.deezer_id is not None %}
-            <a id="{{ track.deezer_id }}DeezerButton" type="button"
+            <a id="{{ track.deezer_id }}DeezerButton"
                class="btn btn-lg btn-light vmargin-sm btn-padding-h"
                href="https://deezer.com/track/{{ track.deezer_id }}">
                 <!-- Deezer icon SVG -->
 
-                <svg class="deezerSVG" width="14" height="14" viewBox="0 0 109 72" fill="none"
+                <svg class="deezerSVG" width="16" height="16" viewBox="0 0 109 72" fill="none"
                      xmlns="http://www.w3.org/2000/svg">
-                    <path d="M108.3 0.699997H84.9V14.4H108.3V0.699997Z" fill="black"/>
-                    <path d="M108.3 19.7H84.9V33.4H108.3V19.7Z" fill="black"/>
-                    <path d="M108.3 38.7H84.9V52.4H108.3V38.7Z" fill="black"/>
-                    <path d="M23.4 57.7H0V71.4H23.4V57.7Z" fill="black"/>
-                    <path d="M51.7 57.7H28.3V71.4H51.7V57.7Z" fill="black"/>
-                    <path d="M80 57.7H56.6V71.4H80V57.7Z" fill="black"/>
-                    <path d="M108.3 57.7H84.9V71.4H108.3V57.7Z" fill="black"/>
-                    <path d="M80 38.7H56.6V52.4H80V38.7Z" fill="black"/>
-                    <path d="M51.7 38.7H28.3V52.4H51.7V38.7Z" fill="black"/>
-                    <path d="M51.7 19.7H28.3V33.4H51.7V19.7Z" fill="black"/>
+                    <path d="M108.3 0.699997H84.9V14.4H108.3V0.699997Z" fill="white"/>
+                    <path d="M108.3 19.7H84.9V33.4H108.3V19.7Z" fill="white"/>
+                    <path d="M108.3 38.7H84.9V52.4H108.3V38.7Z" fill="white"/>
+                    <path d="M23.4 57.7H0V71.4H23.4V57.7Z" fill="white"/>
+                    <path d="M51.7 57.7H28.3V71.4H51.7V57.7Z" fill="white"/>
+                    <path d="M80 57.7H56.6V71.4H80V57.7Z" fill="white"/>
+                    <path d="M108.3 57.7H84.9V71.4H108.3V57.7Z" fill="white"/>
+                    <path d="M80 38.7H56.6V52.4H80V38.7Z" fill="white"/>
+                    <path d="M51.7 38.7H28.3V52.4H51.7V38.7Z" fill="white"/>
+                    <path d="M51.7 19.7H28.3V33.4H51.7V19.7Z" fill="white"/>
                 </svg>
             </a>
         {% endif %}
