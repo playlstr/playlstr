@@ -191,6 +191,20 @@ def fork_playlist(request, playlist_id):
     return redirect(new_list.get_absolute_url())
 
 
+def create_track(request):
+    if not request.is_ajax() or not request.POST or 'title' not in request.POST or request.POST['title'] is None:
+        return HttpResponse('Invalid', status=400)
+    # Try to suggest a similar track if one exists
+    track = get_similar_track(request.POST)
+    if track is not None and ('force_creation' not in request.POST or not request.POST['force_creation']):
+        return HttpResponse('similar\n{}\n{}\n{}\n{}'.format(track.track_id, track.title, track.artist, track.album))
+    try:
+        track = create_custom_track(request.POST)
+        return HttpResponse('{}\n{}\n{}\n{}'.format(track.track_id, track.title, track.artist, track.album))
+    except KeyError:
+        return HttpResponse('Invalid', status=400)
+
+
 @csrf_exempt
 def client_import(request):
     try:

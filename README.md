@@ -15,8 +15,6 @@ Ordered approximately by expected implementation date (soonest first)
 - Build up playlists from other playlists ("sublists")
     - For example, you may have a Downtempo sublist which is included in your Fav Tracks playlist. You want to share your Fav Tracks playlist with a friend but keep it upbeat, so simply deselect Downtempo when exporting to get all tracks in Fav Tracks that aren't in Downtempo.
 - Export playlists using local music files
-- Play tracks in your browser for free with YouTube
-- Download tracks for free from Deezer
 ### Development
 - Install Python 3.6+ and PostgreSQL 11.2+ (other PostgreSQL versions may work but are unsupported)
 - `pip install -r requirements.txt`

@@ -11,7 +11,7 @@ def gplay_search(query: str, search_type='track') -> list:
     Get the results of type search_type from searching Google Play Music for query
     :param query: query to search for
     :param search_type: type of search. Should be one of 'track', 'album', or 'artist'
-    :return:
+    :return: list of dicts of search results
     """
     # First get the base page that comes from searching the query
     result = requests.get(GPLAY_SEARCH_URL + query)

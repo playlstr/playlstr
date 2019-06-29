@@ -63,3 +63,8 @@
     color: #ffffff;
     background-color: #fd8c00;
 }
+
+.modal-body input {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

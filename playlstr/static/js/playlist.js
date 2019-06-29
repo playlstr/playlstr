@@ -389,5 +389,51 @@ function appendSpotifyAlbumTracks(unparsed_album) {
     }
     $('#trackListTBody').append(trackHtml);
     showAddSuccess();
+}
 
+function createNewTrack() {
+    let new_track = {'title': $('#newTrackTitle').val()};
+    let buf = $('#newTrackArtist').val();
+    if (!buf.empty) new_track['artist'] = buf;
+    buf = $('#newTrackAlbum').val();
+    if (!buf.empty) new_track['album'] = buf;
+    buf = $('#newTrackYear');
+    if (!buf.empty) new_track['release_date'] = buf;
+    buf = $('#newTrackNumber');
+    if (!buf.empty) new_track['track_number'] = buf;
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + window.location.host + '/create-track/',
+        headers: {'X-CSRFToken': csrfToken},
+        data: new_track,
+        success: newTrackCreateResponse,
+        error: newTrackCreateFail
+    });
+}
+
+function newTrackCreateResponse(response) {
+    // If server returned a track id then show success message and add that new track
+    let info = response.split('\n');
+    if (info[0] === 'similar') {
+        suggestSimilarTrack(info.slice(1));
+    } else {
+        $('#createTrackModal').modal('hide').find(':input').each(function () {
+            $(this).val('');
+        });
+        addTrack(info[0], info[1], info[2], info[3]);
+    }
+}
+
+function suggestSimilarTrack(info) {
+    // TODO
+}
+
+function newTrackCreateFail() {
+    // TODO
+    console.log('Error creating track');
+}
+
+function newTrackError() {
+    // TODO
+    console.log('error creating track');
 }

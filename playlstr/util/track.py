@@ -69,9 +69,6 @@ def update_track_with_file_metadata(track: Track, data: dict) -> None:
 
 
 def create_custom_track(info: dict) -> Track:
-    if 'title' not in info:
-        print('Tried to add track with no title')
-        return None
     track = Track.objects.create(title=info['title'])
     if 'artist' in info:
         track.artist = info['artist']
@@ -82,8 +79,6 @@ def create_custom_track(info: dict) -> Track:
         if not is_aware(release):
             release = make_aware(release)
         track.release_date = release
-    if 'is_single' in info:
-        track.is_single = bool(info['is_single'])
     if 'album_artist' in info:
         track.album_artist = info['album_artist']
     if 'duration' in info:
@@ -257,3 +252,7 @@ def match_track_gplay(track: Track, match_title=True, match_artist=True) -> bool
         track.save()
         return True
     return False
+
+
+def get_similar_track(track_info: dict) -> Track:
+    return None
