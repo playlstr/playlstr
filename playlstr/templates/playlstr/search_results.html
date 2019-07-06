@@ -1,0 +1,20 @@
+{% extends 'playlstr/base.html' %}
+{% load static %}
+{% block head %}
+    <title>Import</title>
+    <script src="{% static 'js/index.js' %}"></script>
+{% endblock %}
+{% block content %}
+    <div id="resultsContainer" class="centered">
+        {% if results %}
+            {% for playlist in results %}
+                <div class="search-result">
+                    <a class="h3" href="/list/{{ playlist.playlist_id }}">{{ playlist.name }}</a>
+                    &nbsp; &nbsp; by {% if playlist.owner %}{{ playlist.owner }}{% else %}an unknown user{% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No playlists found</p>
+        {% endif %}
+    </div>
+{% endblock %}

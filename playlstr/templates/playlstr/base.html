@@ -26,26 +26,50 @@
     {% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-inverse navbar-light">
-    <a class="navbar-brand" href="/">Playlstr</a>
-    <div class="collapse navbar-collapse" id="navbarElements">
-        <div class="navbar-nav">
-            <a class="nav-item nav-link" href="/import/">Import</a>
-            <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#createPlaylistModal">New</a>
+<nav class="navbar navbar-expand-md navbar-inverse navbar-light navbar-padding" style="background-color: #2b2a2a">
+    <a class="col-sm-4 navbar-brand navbar-padding" href="/">Playlstr</a>
+    <div class="col-sm-4 navbar-nav mx-auto navbar-padding">
+        <ul class="navbar-nav justify-content-center d-flex flex-fill">
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#createPlaylistModal">New</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="/import/">Import</a>
+            </li>
+            <li class="nav-item"
+                onmouseenter="$('#playlistSearchForm').fadeIn(200); document.getElementById('playlistSearch').select(); searchHovered = true;"
+                onmouseleave="searchHovered = false; setTimeout(function() {if (!searchHovered) $('#playlistSearchForm').fadeOut(200);}, 250)">
+                <form class="form-inline my-2 my-lg-0 hidden" id="playlistSearchForm" style="float: left;">
+                    <input id="playlistSearch" class="form-control mr-sm-2" type="search" placeholder="Search"
+                           aria-label="Search">
+                </form>
+                <a style="float: right;" class="nav-link" href="#" onclick="searchClicked();return false;">Search</a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-sm-4 mx-auto navbar-nav navbar-padding">
+        <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
-                <a class="nav-item nav-link" href="/me/">{{ user }}</a>
-                <a class="nav-item nav-link text-danger" href="/logout/">Logout</a>
-                <a class="nav-item nav-link" onclick="spotifyAuthLoggedIn();return false;" id="spotifyAuthButton"
-                   href="#">Authenticate with Spotify</a>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="spotifyAuthLoggedIn(); return false;" id="spotifyAuthButton" href="#"
+                       style="color: #222;">Authenticate with Spotify</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/me/">{{ user }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout/">Logout</a>
+                </li>
             {% else %}
-                <a class="nav-item nav-link text-success" href="{% url 'social:begin' 'google-oauth2' %}">Log In</a>
-                <a class="nav-item nav-link" href="#" onclick="spotifyAuthLoggedOut();return false;"
-                   id="spotifyAuthButton">Authenticate with Spotify</a>
+                <li class="nav-item">
+                    <a class="nav-link text-bg-light" onclick="spotifyAuthLoggedOut(); return false;"
+                       id="spotifyAuthButton" href="#" style="color: #222;">Authenticate with Spotify</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-success" href="{% url 'social:begin' 'google-oauth2' %}">Log In</a>
+                </li>
             {% endif %}
-            {% if user.is_admin %}
-                <a class="nav-item nav-link" href="/admin/">Admin</a>
-            {% endif %}
-        </div>
+        </ul>
     </div>
 </nav>
 {% block content-header %}

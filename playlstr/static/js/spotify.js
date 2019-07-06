@@ -39,6 +39,10 @@ function loadSpotifyAccessToken() {
     if (savedToken === '') {
         if (authenticated) {
             getNewAccessTokenLoggedIn();
+        } else {
+            $(document).ready(function () {
+                $('#spotifyAuthButton').removeAttr('style');
+            });
         }
         return;
     }

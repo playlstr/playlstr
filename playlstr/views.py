@@ -205,6 +205,13 @@ def create_track(request):
         return HttpResponse('Invalid', status=400)
 
 
+def search(request):
+    if not request.GET.get('q'):
+        return HttpResponse('No search query', status=400)
+    playlists = Playlist.objects.filter(name__contains=request.GET.get('q')).all()
+    return render(request, 'playlstr/search_results.html', {'results': playlists})
+
+
 @csrf_exempt
 def client_import(request):
     try:

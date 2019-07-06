@@ -1,3 +1,5 @@
+let searchHovered = false;
+
 String.prototype.format = String.prototype.f = function () {
     let s = this,
         i = arguments.length;
@@ -33,5 +35,13 @@ function createPlaylistFail(data) {
 
 function createPlaylistSuccess(data) {
     window.location = 'http://' + window.location.host + '/list/' + data;
+}
+
+function searchClicked() {
+    let query = document.getElementById('playlistSearch').value;
+    if (query.length === 0) {
+        return;
+    }
+    window.location.href = '/search?q=' + query;
 }
 

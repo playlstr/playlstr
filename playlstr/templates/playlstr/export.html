@@ -58,8 +58,10 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="explicitCheck"
                            {% if not explicit %}disabled{% endif %}>
-                    <label class="form-check-label" for="defaultCheck1">
-                        Include explicit tracks {% if not explicit %}(no explicit tracks in this playlist){% endif %}
+                    <label class="form-check-label" for="explicitCheck">
+                        {% if not explicit %}<strike>{% endif %}
+                        Include explicit tracks
+                        {% if not explicit %}</strike>{% endif %}
                     </label>
                 </div>
             </div>
