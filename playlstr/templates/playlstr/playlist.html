@@ -80,6 +80,18 @@
                             Fork
                         </button>
                     {% endif %}
+                    {% if playlist.spotify_id %}
+                        <a class="btn btn-padding-h spotify" id="spotifyButton"
+                           href="https://open.spotify.com/playlist/{{ playlist.spotify_id }}">
+                            View on Spotify
+                        </a>
+                        {% if playlist.owner.id == user.id %}
+                            <a class="btn btn-padding-h spotify" id="spotifyButton"
+                               href="#">
+                                Sync with Spotify
+                            </a>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
             <div id="addTrackContainer" style="display:none;margin-bottom: 20px;">

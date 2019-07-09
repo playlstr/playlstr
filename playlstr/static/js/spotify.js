@@ -1,4 +1,5 @@
 let spotifyAccessToken = null;
+let userSpotifyId = null;
 let SPOTIFY_REDIRECT_URI = 'http://' + window.location.host.toString() + '/spotify-redirect/';
 
 function hideSpotifyAuth() {
@@ -130,5 +131,20 @@ function spotifyAuthLoggedIn() {
 function getCookieValue(a) {
     let b = document.cookie.match('(^|[^;]+)\\s*' + a + '\\s*=\\s*([^;]+)');
     return b ? b.pop() : '';
+}
+
+function getUserSpotifyPlaylists(first_call = false) {
+    if (spotifyAccessToken === null || userSpotifyId === null) return;
+    $.ajax({
+        type: 'GET',
+        url: 'https://api.spotify.com/v1/users/' + userSpotifyId + '/playlists',
+        data: {'offset': userPlaylistsOffset, 'limit': 20},
+        dataType: 'json',
+        headers: {'Authorization': 'Bearer ' + spotifyAccessToken},
+        success: function (data) {
+            appendUserSpotifyPlaylists(data.items, !first_call, data['next'] !== null);
+            userPlaylistsOffset += 20;
+        }
+    });
 }
 

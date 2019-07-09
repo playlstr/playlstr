@@ -4,11 +4,20 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
+import requests
+import json
+from base64 import b64encode
+
+from .apikeys import *
+
 UNKNOWN_ALBUM = 'Unknown album'
 UNKNOWN_ARTIST = 'Unknown artist'
 
 
 class PlaylstrUser(AbstractUser):
+    spotify_id = models.CharField(max_length=128, null=True, blank=True)
+    spotify_username = models.CharField(max_length=128, null=True, blank=True)
+    spotify_country = models.CharField(max_length=3, null=True, blank=True)
     spotify_access_token = models.CharField(max_length=256, null=True, blank=True)
     spotify_refresh_token = models.CharField(max_length=256, null=True, blank=True)
     spotify_token_expiry = models.DateTimeField(null=True, blank=True)
@@ -18,6 +27,50 @@ class PlaylstrUser(AbstractUser):
 
     def spotify_token_expired(self):
         return self.spotify_token_expiry >= timezone.now()
+
+    def update_spotify_info(self):
+        """
+        Updates spotify_username and spotify_id for user
+        :return: True iff the info was updated
+        """
+        if self.spotify_token_expiry:
+            self.update_spotify_tokens()
+        headers = {'Authorization': 'Bearer {}'.format(self.spotify_access_token)}
+        response = requests.post('https://api.spotify.com/v1/me', headers=headers)
+        if response.status_code != 200:
+            return False
+        user = response.json()
+        if 'country' in user:
+            self.spotify_country = user['country']
+        if 'display_name' in user and user['display_name']:
+            self.spotify_username = user['display_name']
+        self.spotify_id = user['id']
+        self.save()
+
+    def update_spotify_tokens(self) -> str:
+        body = {'grant_type': 'refresh_token', 'refresh_token': self.spotify_refresh_token}
+        headers = {'Authorization': 'Basic {}'.format(
+            b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
+        response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=body)
+        if response.status_code != 200:
+            return 'response error'
+        try:
+            info = response.json()
+        except json.JSONDecodeError:
+            return 'json error'
+        if 'access_token' not in info:
+            return 'access token error'
+        if 'expires_in' not in info:
+            info['expires_in'] = 3600
+        if 'refresh_token' in info:
+            self.spotify_refresh_token = info['refresh_token']
+        self.spotify_access_token = info['access_token']
+        try:
+            self.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
+        except ValueError:
+            return 'invalid expiry'
+        self.save()
+        return 'success'
 
 
 class Track(models.Model):

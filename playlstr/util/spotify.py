@@ -4,6 +4,7 @@ from math import floor
 from django.db.models import Q
 import re
 import requests
+from django.db.utils import IntegrityError
 
 from playlstr.apikeys import *
 from playlstr.models import *
@@ -17,16 +18,15 @@ def import_spotify(info: dict) -> str:
     """
     url = info['playlist_url']
     # Validate URL
-    if not (isinstance(url, str) and re.match(r'^http(s?)://open\.spotify\.com/playlist/.{22}/?', url)):
-        return 'Invalid URL'
+    if not (isinstance(url, str) and re.match(r'^http(s?)://open\.spotify\.com/playlist/[a-zA-Z\d]*/?', url)):
+        return 'invalid'
     playlist_id = url[-23:0] if url[-1] == '/' else url[-22:]
     query_url = 'https://api.spotify.com/v1/playlists/' + playlist_id
     query_headers = {'Authorization': 'Bearer {}'.format(info['access_token'])}
     # Get/create playlist
     playlist_json = requests.get(query_url, headers=query_headers).json()
-    playlist = Playlist.objects.get_or_create(spotify_id=playlist_id, owner=info['user'])[0]
-    playlist.name = playlist_json['name']
-    playlist.last_sync_spotify = timezone.now()
+    playlist = Playlist(name=playlist_json['name'], last_sync_spotify=timezone.now(), spotify_id=playlist_id,
+                        owner=info['user'])
     playlist.save()
     # Get playlist tracks
     tracks_response = requests.get(query_url + '/tracks', headers=query_headers)
@@ -43,9 +43,12 @@ def import_spotify(info: dict) -> str:
         for j in tracks_json['items']:
             index += 1
             track = track_from_spotify_json(j['track'])
-            PlaylistTrack.objects.create(playlist=playlist, track=track, index=index)
+            try:
+                PlaylistTrack.objects.create(playlist=playlist, track=track, index=index)
+            except IntegrityError:
+                continue
         tracks_json = requests.get(tracks_json['next'], headers=query_headers).json()
-    return playlist.playlist_id
+    return str(playlist.playlist_id)
 
 
 def track_from_spotify_json(track_json: dict) -> Track:
@@ -95,41 +98,14 @@ def valid_spotify_token(token: str) -> bool:
 
 
 def get_user_spotify_token(user: PlaylstrUser) -> dict:
-    if user.spotify_access_token is None or user.spotify_refresh_token is None:
+    if not user.spotify_linked():
         return {'error': 'unauthorized'}
     if user.spotify_token_expiry is None or user.spotify_token_expiry <= timezone.now():
-        updated_token = update_spotify_token_for_user_with_valid_tokens(user)
+        updated_token = user.update_spotify_tokens()
         if updated_token != 'success':
             return {'error': updated_token}
     return {'access_token': user.spotify_access_token,
             'expires_in': floor((user.spotify_token_expiry - timezone.now()).total_seconds())}
-
-
-def update_spotify_token_for_user_with_valid_tokens(user: PlaylstrUser) -> str:
-    body = {'grant_type': 'refresh_token', 'refresh_token': user.spotify_refresh_token}
-    headers = {'Authorization': 'Basic {}'.format(
-        b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
-    response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=body)
-    if response.status_code != 200:
-        print(response.reason)
-        return 'response error'
-    try:
-        info = response.json()
-    except json.JSONDecodeError:
-        return 'json error'
-    if 'access_token' not in info:
-        return 'access token error'
-    if 'expires_in' not in info:
-        info['expires_in'] = 3600
-    if 'refresh_token' in info:
-        user.spotify_refresh_token = info['refresh_token']
-    user.spotify_access_token = info['access_token']
-    try:
-        user.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
-    except ValueError:
-        return 'invalid expiry'
-    user.save()
-    return 'success'
 
 
 def spotify_parse_code(info: dict) -> str:
@@ -153,7 +129,27 @@ def spotify_parse_code(info: dict) -> str:
     user.spotify_access_token = info['access_token']
     try:
         user.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
-        print(user.spotify_token_expiry)
     except ValueError:
         return ''
+    user.update_spotify_details()
     user.save()
+
+
+def spotify_create_playlist(info: dict) -> str:
+    if 'user_id' not in info:
+        raise ValueError('No user specified')
+    if 'playlist_id' in info:
+        raise ValueError('No playlist specified')
+    playlist = Playlist.objects.get(playlist_id=info['playlist_id'])
+    user = User.objects.get(user_id=info['user_id'])
+    if not user.spotify_linked() or user.id is None:
+        raise ValueError('User hasn\'t linked Spotify')
+    headers = {'Authorization': 'Bearer {}'.format(user.spotify_access_token),
+               'Content-Type': 'application/json'}
+    body = {'name': playlist.name, 'public': bool(info.get('public'))}
+    if 'description' in info:
+        body['description'] = info['description']
+    response = requests.post('https://api.spotify.com/v1/users/{}/playlists'.format(user.spotify_id), headers=headers)
+    if response.status_code != 200:
+        return 'Error {}'.format(response.reason)
+    return response.json()['id']

@@ -12,7 +12,7 @@
     <div id="spotifyImportContainer" class="centered">
         <div id="spotifyImport" class="input-group mb-3">
             <span class="input-group-text" id="spotifyImportText">
-                Spotify
+                Spotify URL
             </span>
             <input type="text" class="form-control" id="spotifyImportInput">
             <button type="button" class="btn btn-secondary btn-sm" onclick="importSpotifyUrl()">
@@ -23,8 +23,16 @@
         <div id="spotifyImportRequestSent" class="centered hidden">
             <div id="spotifyImportSpinner" class="spinner-border">
             </div>
-            Importing...
+            <h3>Importing...</h3><br>(This may take a minute, we'll let you know if anything goes wrong)
         </div>
+        {% if user.spotify_id %}
+            <div id="spotifyPlaylists" class="list-group"
+                 style="max-height: 400px;overflow-y:scroll;-webkit-overflow-scrolling: touch;">
+                <div class="nav-header list-group-item h4">From Spotify</div>
+            </div>
+            <script type="text/javascript">userSpotifyId = '{{ user.spotify_id }}';
+            getUserSpotifyPlaylists(true);</script>
+        {% endif %}
         <div id="spotifyImportFailed" class="alert alert-danger hidden">
             Failed to import playlist
         </div>

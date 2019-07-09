@@ -27,9 +27,12 @@ def import_playlist(request):
 
 
 def spotify_import(request):
-    params = request.POST
+    params = {k: v[0] for (k, v) in dict(request.POST).items()}
     params['user'] = request.user
-    return HttpResponse(import_spotify(params))
+    result = import_spotify(params)
+    if result == 'invalid':
+        return HttpResponse('Invalid URL', status=400)
+    return HttpResponse(result)
 
 
 def create_playlist(request):

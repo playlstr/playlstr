@@ -1,5 +1,8 @@
-function importSpotifyUrl() {
-    let import_url = document.getElementById('spotifyImportInput').value;
+let userPlaylistsOffset = 0;
+
+function importSpotifyUrl(import_url = '') {
+    if (import_url === '') import_url = document.getElementById('spotifyImportInput').value;
+    console.log(import_url);
     let location = document.location.toString();
     if (spotifyAccessToken === null) {
         alert('Authenticate with Spotify first');
@@ -27,7 +30,6 @@ function importSpotifyUrl() {
 }
 
 function spotifyImportComplete(data) {
-    console.log(data);
     window.location = 'http://' + window.location.host + '/list/' + data;
 }
 
@@ -61,4 +63,15 @@ function sendPlaylistImportRequest(callback) {
 function localImportFail(error) {
     // TODO
     console.log(error);
+}
+
+function appendUserSpotifyPlaylists(playlists, more_button_exists = false, create_more_button = false) {
+    let playlistsDiv = document.getElementById('spotifyPlaylists');
+    if (more_button_exists) $('#spotifyPlaylists button:last-child').remove();
+    for (let i = 0; i < playlists.length; i++) {
+        $(playlistsDiv).append('<button class="list-group-item list-group-item-action" onclick="importSpotifyUrl(\'https://open.spotify.com/playlist/' + playlists[i].id + '\');">' + playlists[i].name + '</button>')
+    }
+    if (create_more_button) {
+        $(playlistsDiv).append('<button class="list-group-item list-group-item-action" onclick="getUserSpotifyPlaylists();">More</button>')
+    }
 }
