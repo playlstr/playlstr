@@ -39,7 +39,8 @@
             <li class="nav-item"
                 onmouseenter="$('#playlistSearchForm').fadeIn(200); document.getElementById('playlistSearch').select(); searchHovered = true;"
                 onmouseleave="searchHovered = false; setTimeout(function() {if (!searchHovered) $('#playlistSearchForm').fadeOut(200);}, 250)">
-                <form class="form-inline my-2 my-lg-0 hidden" id="playlistSearchForm" style="float: left;">
+                <form class="form-inline my-2 my-lg-0 hidden" id="playlistSearchForm" style="float: left;"
+                      onsubmit="searchClicked();return false;">
                     <input id="playlistSearch" class="form-control mr-sm-2" type="search" placeholder="Search"
                            aria-label="Search">
                 </form>

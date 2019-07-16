@@ -1,12 +1,9 @@
-import json
-from base64 import b64encode
-from math import floor
-from django.db.models import Q
 import re
-import requests
+from typing import Optional
+
+from django.db.models import Q
 from django.db.utils import IntegrityError
 
-from playlstr.apikeys import *
 from playlstr.models import *
 
 
@@ -131,25 +128,70 @@ def spotify_parse_code(info: dict) -> str:
         user.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
     except ValueError:
         return ''
-    user.update_spotify_details()
+    user.update_spotify_info()
     user.save()
 
 
-def spotify_create_playlist(info: dict) -> str:
-    if 'user_id' not in info:
-        raise ValueError('No user specified')
-    if 'playlist_id' in info:
-        raise ValueError('No playlist specified')
-    playlist = Playlist.objects.get(playlist_id=info['playlist_id'])
-    user = User.objects.get(user_id=info['user_id'])
-    if not user.spotify_linked() or user.id is None:
-        raise ValueError('User hasn\'t linked Spotify')
-    headers = {'Authorization': 'Bearer {}'.format(user.spotify_access_token),
+def spotify_create_playlist(playlist_id: int, access_token: str, user_spotify_id: str, public: bool = True,
+                            description: str = None) -> str:
+    playlist = Playlist.objects.get(playlist_id=playlist_id)
+    headers = {'Authorization': 'Bearer {}'.format(access_token),
                'Content-Type': 'application/json'}
-    body = {'name': playlist.name, 'public': bool(info.get('public'))}
-    if 'description' in info:
-        body['description'] = info['description']
-    response = requests.post('https://api.spotify.com/v1/users/{}/playlists'.format(user.spotify_id), headers=headers)
-    if response.status_code != 200:
+    body = {'name': playlist.name, 'public': public}
+    if description is not None:
+        body['description'] = description
+    response = requests.post('https://api.spotify.com/v1/users/{}/playlists'.format(user_spotify_id), headers=headers,
+                             json=body)
+    if response.status_code != 200 and response.status_code != 201:
         return 'Error {}'.format(response.reason)
     return response.json()['id']
+
+
+def add_tracks_to_spotify_playlist(tracks: list, playlist_spotify_id: str, access_token: str):
+    headers = {'Authorization': 'Bearer {}'.format(access_token),
+               'Content-Type': 'application/json'}
+    print(playlist_spotify_id)
+    # Add tracks 100 at a time per Spotify API docs
+    for i in range(0, len(tracks), 100):
+        last = min(i + 100, len(tracks))
+        uris = ['spotify:track:{}'.format(t.spotify_id) for t in tracks[i: last] if t.spotify_id is not None]
+        response = requests.post('https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_spotify_id),
+                                 headers=headers, json={'uris': uris})
+        if response.status_code != 200 and response.status_code != 201:
+            print('Error: {} (processing tracks {} to {})'.format(response.text, i, last))
+            return False
+        if last == len(tracks):
+            break
+    return True
+
+
+def spotify_playlist_as_json_tracks(playlist_id: int, access_token: str) -> list:
+    query_url = 'https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_id)
+    query_headers = {'Authorization': 'Bearer {}'.format(access_token)}
+    # Get playlist tracks
+    tracks_response = requests.get(query_url, headers=query_headers)
+    if tracks_response.status_code != 200:
+        return tracks_response.reason
+    tracks_json = tracks_response.json()
+    if 'error_description' in tracks_json:
+        return []
+    # Get list of tracks
+    tracks = []
+    while 'next' in tracks_json and tracks_json['next'] is not None:
+        for t in tracks_json['items']:
+            tracks.append(t['track'])
+        tracks_json = requests.get(tracks_json['next'], headers=query_headers).json()
+    return tracks
+
+
+def spotify_id_from_token(access_token: str) -> Optional[str]:
+    if access_token is None:
+        return None
+    headers = {'Authorization': 'Bearer {}'.format(access_token)}
+    response = requests.post('https://api.spotify.com/v1/me', headers=headers)
+    if response.status_code != 200:
+        return None
+    user = response.json()
+    if 'id' not in user:
+        return None
+    return user['id']

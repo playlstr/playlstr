@@ -85,12 +85,6 @@
                            href="https://open.spotify.com/playlist/{{ playlist.spotify_id }}">
                             View on Spotify
                         </a>
-                        {% if playlist.owner.id == user.id %}
-                            <a class="btn btn-padding-h spotify" id="spotifyButton"
-                               href="#">
-                                Sync with Spotify
-                            </a>
-                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -193,9 +187,9 @@
                         <td><a href="/track/{{ track.track_id }}">{{ track.title }}</a></td>
                         <td>{{ track.artist }}</td>
                         <td>{{ track.album }}</td>
-                        <td>
+                        <td style="white-space: nowrap;">
                             <button type="button" class="btn btn-dark btn-padding-h"
-                                    onclick="downloadTrack({{ track.track_id }})">
+                                    onclick="downloadTrack({{ track.track_id }})" style="display: inline;">
                                 <i class="fa fa-download"></i>
                             </button>
                             {% if track.youtube_id is not None %}

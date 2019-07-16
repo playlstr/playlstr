@@ -1,12 +1,13 @@
+import json
+from base64 import b64encode
+from math import floor
+
+import requests
 from django.conf import settings
 from django.contrib.auth.models import User, AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
-
-import requests
-import json
-from base64 import b64encode
 
 from .apikeys import *
 
@@ -22,23 +23,43 @@ class PlaylstrUser(AbstractUser):
     spotify_refresh_token = models.CharField(max_length=256, null=True, blank=True)
     spotify_token_expiry = models.DateTimeField(null=True, blank=True)
 
+    def spotify_info(self):
+        if not self.spotify_linked():
+            return {'error': 'unauthorized'}
+        if self.spotify_token_expiry is None or self.spotify_token_expiry <= timezone.now():
+            updated_token = self.update_spotify_tokens()
+            if updated_token != 'success':
+                return {'error': updated_token}
+        if not self.spotify_id:
+            self.update_spotify_info()
+        return {'access_token': self.spotify_access_token,
+                'expires_in': floor((self.spotify_token_expiry - timezone.now()).total_seconds()),
+                'spotify_id': self.spotify_id}
+
+    def spotify_token(self):
+        if not self.spotify_linked():
+            return ''
+        if self.spotify_token_expiry >= timezone.now():
+            self.update_spotify_tokens()
+        return self.spotify_access_token
+
     def spotify_linked(self):
         return self.spotify_access_token is not None and self.spotify_refresh_token is not None
 
     def spotify_token_expired(self):
         return self.spotify_token_expiry >= timezone.now()
 
-    def update_spotify_info(self):
+    def update_spotify_info(self) -> str:
         """
         Updates spotify_username and spotify_id for user
-        :return: True iff the info was updated
+        :return: empty string if update successful else error information
         """
         if self.spotify_token_expiry:
             self.update_spotify_tokens()
         headers = {'Authorization': 'Bearer {}'.format(self.spotify_access_token)}
-        response = requests.post('https://api.spotify.com/v1/me', headers=headers)
+        response = requests.get('https://api.spotify.com/v1/me', headers=headers)
         if response.status_code != 200:
-            return False
+            return '{}: {}'.format(response.status_code, response.reason)
         user = response.json()
         if 'country' in user:
             self.spotify_country = user['country']
@@ -46,6 +67,7 @@ class PlaylstrUser(AbstractUser):
             self.spotify_username = user['display_name']
         self.spotify_id = user['id']
         self.save()
+        return ''
 
     def update_spotify_tokens(self) -> str:
         body = {'grant_type': 'refresh_token', 'refresh_token': self.spotify_refresh_token}
@@ -53,7 +75,7 @@ class PlaylstrUser(AbstractUser):
             b64encode((SPOTIFY_CLIENT_ID + ':' + SPOTIFY_CLIENT_SECRET).encode()).decode())}
         response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=body)
         if response.status_code != 200:
-            return 'response error'
+            return 'server responded with {} {}'.format(response.status_code, response.reason)
         try:
             info = response.json()
         except json.JSONDecodeError:
@@ -125,6 +147,10 @@ class Track(models.Model):
     def as_export_text(self):
         return '{} - {} ({}{})'.format(self.artist, self.title, self.album,
                                        '' if self.year is None else ', {}'.format(self.year))
+
+    def json(self):
+        return {'title': self.title, 'id': self.track_id, 'album': self.album, 'artist': self.artist,
+                'spotify_id': self.spotify_id, 'year': self.year, 'name': self.title}
 
 
 class Playlist(models.Model):

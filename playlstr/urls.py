@@ -30,7 +30,7 @@ urlpatterns = [
     path('playlist-update/', views.playlist_update, name='playlist_update'),
     path('', include('social_django.urls', namespace='social')),
     path('logout/', views.logout_view, name='logout'),
-    path('get-spotify-token/', views.get_spotify_token, name='get_spotify_token'),
+    path('user-spotify-token/', views.user_spotify_token, name='get_spotify_token'),
     path('spotify-auth-user/', views.spotify_auth_user, name='spotify_auth_user'),
     path('client-import/', views.client_import, name='client_import'),
     path('local-import/', views.local_file_import, name='local_import'),
@@ -41,5 +41,6 @@ urlpatterns = [
     path('profile/<int:user_id>/', views.profile, name='profile'),
     path('fork/<int:playlist_id>/', views.fork_playlist, name='fork_playlist'),
     path('create-track/', views.create_track, name='create_track'),
-    path('search/', views.search, name='playlist_search')
+    path('search/', views.search, name='playlist_search'),
+    path('spotify-export/', views.export_spotify, name='spotify_export')
 ]

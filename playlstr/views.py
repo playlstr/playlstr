@@ -29,6 +29,7 @@ def import_playlist(request):
 def spotify_import(request):
     params = {k: v[0] for (k, v) in dict(request.POST).items()}
     params['user'] = request.user
+    params['access_token'] = request.COOKIES.get('spotify-token')
     result = import_spotify(params)
     if result == 'invalid':
         return HttpResponse('Invalid URL', status=400)
@@ -91,10 +92,13 @@ def logout_view(request):
     return redirect(LOGOUT_REDIRECT_URL)
 
 
-def get_spotify_token(request):
+def user_spotify_token(request):
     if not request.is_ajax() or request.user is None:
         return HttpResponse("Invalid", status=400)
-    return JsonResponse(json.dumps(get_user_spotify_token(request.user)), safe=False)
+    json_resp = json.dumps(get_user_spotify_token(request.user))
+    if 'error' in json_resp:
+        return HttpResponse(json_resp['error'], status=400)
+    return JsonResponse(json_resp, safe=False)
 
 
 def spotify_auth_user(request):
@@ -213,6 +217,36 @@ def search(request):
         return HttpResponse('No search query', status=400)
     playlists = Playlist.objects.filter(name__contains=request.GET.get('q')).all()
     return render(request, 'playlstr/search_results.html', {'results': playlists})
+
+
+def export_spotify(request):
+    if not request.POST.get('playlist_id'):
+        return HttpResponse('No playlist', status=400)
+    user = PlaylstrUser.objects.filter(id=request.user.id).first()
+    if user is None or not user.spotify_linked():
+        access_token = request.COOKIES.get('spotify-token')
+        spotify_id = spotify_id_from_token(access_token)
+        if access_token is None or spotify_id is None:
+            return HttpResponse('No Spotify token', status=400)
+    else:
+        access_token = user.spotify_token()
+        spotify_id = user.spotify_id
+        if spotify_id is None:
+            if not user.update_spotify_info():
+                return HttpResponse('Error getting Spotify ID', status=500)
+            spotify_id = user.spotify_id
+    if request.POST.get('criteria'):
+        tracks = tracks_matching_criteria(request.POST['playlist_id'], json.loads(request.POST['criteria']))
+    else:
+        tracks = PlaylistTrack.objects.filter(playlist=request.POST['playlist_id']).values('track')
+    if len(tracks) == 0:
+        return HttpResponse('Empty playlist', status=400)
+    spotify_playlist = spotify_create_playlist(request.POST.get('playlist_id'), access_token, spotify_id)
+    if spotify_playlist.startswith('Error'):
+        return HttpResponse('Couldn\'t create playlist: '.format(spotify_playlist), status=500)
+    if not add_tracks_to_spotify_playlist(tracks, spotify_playlist, access_token):
+        return HttpResponse('Couldn\'t add tracks', status=500)
+    return HttpResponse('https://open.spotify.com/playlist/{}'.format(spotify_playlist))
 
 
 @csrf_exempt

@@ -11,11 +11,14 @@ function hideSpotifyAuth() {
 function getNewAccessTokenLoggedIn(redirect = false) {
     $.ajax({
         type: 'GET',
-        url: 'http://' + window.location.host + '/get-spotify-token/',
+        url: 'http://' + window.location.host + '/user-spotify-token/',
         headers: {'X-CSRFToken': csrfToken},
         success: function (data) {
             parseUserSpotifyToken(data);
             if (redirect) redirectToPreauthUrl();
+        },
+        error: function (data) {
+            console.log(data);
         }
     });
 }
@@ -30,6 +33,7 @@ function parseUserSpotifyToken(data) {
     let expiryDate = new Date();
     expiryDate.setSeconds(expiryDate.getSeconds() + parseInt(data['expires_in']));
     document.cookie = 'spotify-token=' + data['access_token'] + '; expires=' + expiryDate.toString() + '; path=/';
+    console.log(data);
     hideSpotifyAuth();
 }
 
@@ -68,7 +72,10 @@ function parseSpotifyAccessTokenFromLocationLoggedIn(redirect = false) {
             'code': token,
             'redirect_uri': location.substring(0, access_token_start - 6)
         },
-        success: getNewAccessTokenLoggedIn(redirect)
+        success: getNewAccessTokenLoggedIn(redirect),
+        error: function (data) {
+            console.log(data);
+        }
     });
 }
 

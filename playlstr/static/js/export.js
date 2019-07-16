@@ -65,12 +65,26 @@ function getExcludedGenres() {
 }
 
 function exportToSpotify() {
-    // TODO
+    let criteria = JSON.stringify({
+        'excluded_genres': getExcludedGenres(),
+        'explicit': $('#explicitCheck').is(':checked'),
+        'excluded_artists': excludedArtists,
+        'excluded_albums': excludedAlbums
+    });
+    $.ajax({
+        type: 'POST',
+        url: 'http://' + window.location.host + '/spotify-export/',
+        data: {'playlist_id': playlist_id, 'criteria': criteria},
+        headers: {'X-CSRFToken': csrfToken},
+        success: function (result) {
+            window.location = result;
+        },
+        error: exportFail
+    });
 }
 
-function exportFail() {
-    // TODO
-    console.log('export failed');
+function exportFail(data) {
+    $('#exportError').text('Unable to export playlist (' + data.responseText + ')').fadeIn().delay(4000).fadeOut();
 }
 
 

@@ -10,11 +10,9 @@
     - Exclude specific genres, albums, or artists or explicit tracks
 ### Planned features
 Ordered approximately by expected implementation date (soonest first)
-- Export playlists to streaming services
-- Import playlists from other streaming services
+- Support for more streaming services
 - Build up playlists from other playlists ("sublists")
-    - For example, you may have a Downtempo sublist which is included in your Fav Tracks playlist. You want to share your Fav Tracks playlist with a friend but keep it upbeat, so simply deselect Downtempo when exporting to get all tracks in Fav Tracks that aren't in Downtempo.
-- Export playlists using local music files
+- beets plugin for exporting to local files
 ### Development
 - Install Python 3.6+ and PostgreSQL 11.2+ (other PostgreSQL versions may work but are unsupported)
 - `pip install -r requirements.txt`

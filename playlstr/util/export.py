@@ -1,5 +1,6 @@
-from .playlist import *
 from django.core.exceptions import ObjectDoesNotExist
+
+from .playlist import *
 
 
 def export_as_text(playlist_name: str, tracks: list) -> str:
@@ -12,26 +13,6 @@ def export_as_text(playlist_name: str, tracks: list) -> str:
 def export_as_m3u(playlist_name: str, tracks: list) -> str:
     # TODO
     raise ValueError
-
-
-def export_spotify(playlist_id: int, user_id: int, **info) -> str:
-    """
-    Create playlist playlist_id on Spotify as user user_id
-
-    pre: user_id is a valid user who has linked their Spotify
-    :param playlist_id: id of playlist being exported
-    :param user_id: internal id of the user who will create the playlist on spotify
-    :return: url of created playlist or error message beginning with 'Error' on error
-    """
-    info['playlist_id'] = playlist_id
-    info['user_id'] = user_id
-    try:
-        spotify_id = spotify_create_playlist(info)
-        copy_tracks_to_spotify(PlaylistTrack.objects.filter(playlist__playlist_id=playlist_id).all(), spotify_id,
-                               user_id)
-        return 'http://open.spotify.com/playlist/{}'.format(spotify_id)
-    except ValueError as e:
-        return 'Error {}'.format(str(e))
 
 
 def tracks_matching_criteria(playlist_id: int, criteria: dict) -> list:

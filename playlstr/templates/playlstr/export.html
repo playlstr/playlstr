@@ -69,6 +69,16 @@
                 <button id="exportAsTextButton" type="button" class="btn btn-primary" onclick="exportAsText();">Export
                     as Text
                 </button>
+                <button id="exportSpotifyButton" type="button" class="btn btn-primary" onclick="exportToSpotify();"
+                        style="display: none;">Export to Spotify
+                </button>
+                <script type="text/javascript">$(function () {
+                    console.log(spotifyAccessToken);
+                    if (spotifyAccessToken !== null) $('#exportSpotifyButton').show();
+                });</script>
+            </div>
+            <div id="exportError" class="alert-danger" style="display: none;">
+                Error exporting playlist
             </div>
         </form>
     {% else %}
