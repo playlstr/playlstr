@@ -154,7 +154,12 @@ def add_tracks_to_spotify_playlist(tracks: list, playlist_spotify_id: str, acces
     # Add tracks 100 at a time per Spotify API docs
     for i in range(0, len(tracks), 100):
         last = min(i + 100, len(tracks))
-        uris = ['spotify:track:{}'.format(t.spotify_id) for t in tracks[i: last] if t.spotify_id is not None]
+        uris = []
+        for t in tracks[i: last]:
+            if t.spotify_id:
+                uris.append('spotify:track:{}'.format(t.spotify_id))
+            elif match_track_spotify(t, access_token):
+                uris.append('spotify:track:{}'.format(t.spotify_id))
         response = requests.post('https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_spotify_id),
                                  headers=headers, json={'uris': uris})
         if response.status_code != 200 and response.status_code != 201:
@@ -195,3 +200,55 @@ def spotify_id_from_token(access_token: str) -> Optional[str]:
     if 'id' not in user:
         return None
     return user['id']
+
+
+def spotify_track_search(query: str, access_token: str) -> dict:
+    response = requests.get('https://api.spotify.com/v1/search?q={}&type=track'.format(query),
+                            headers={'Authorization': 'Bearer {}'.format(access_token)})
+    if response.status_code == 200 and 'tracks' in response.text and 'items' in response.text:
+        return json.loads(response.text)['tracks']['items']
+    return {'error': response.reason, 'status': response.status_code}
+
+
+def match_track_spotify(track: Track, access_token: str, match_title=True, match_album=True, match_artist=True,
+                        *match_custom) -> bool:
+    """
+    Find Spotify track matching the track info and update the Track with Spotify info if specified attributes are the same
+    :param track: Track to find matching info for
+    :param access_token: Spotify access token to use when searching
+    :param match_title: whether to require matching track title to update track
+    :param match_album: whether to require matching track album to update track
+    :param match_artist: whether to require matching track artist to update track
+    :param match_custom: Track attributes which must be the same as the Spotify attribute
+    :return: whether the track was updated
+    :raises AttributeError: if a key in match_custom is not in track or a Spotify track
+    """
+    # Make sure all the custom attributes are valid
+    for req in match_custom:
+        if not hasattr(track, req):
+            raise AttributeError
+    spotify_results = spotify_track_search(
+        '{} {}'.format(track.title, track.artist) if track.artist != UNKNOWN_ARTIST else track.title, access_token)
+    if 'error' in spotify_results:
+        print('error {} {}'.format(spotify_results['status'], spotify_results['error']))
+        return False
+    for strack in spotify_results:
+        if match_title and strack['name'] != track.title:
+            continue
+        if match_artist and strack['artists'][0]['name'] != track.artist:
+            continue
+        if match_album and strack['album']['name'] != track.album:
+            continue
+        reqs_matched = False if match_custom else True
+        for req in match_custom:
+            if req not in strack:
+                raise AttributeError
+            if strack[req] != getattr(track, req):
+                reqs_matched = False
+                break
+        if not reqs_matched:
+            continue
+        track.spotify_id = strack['id']
+        track.save()
+        return True
+    return False

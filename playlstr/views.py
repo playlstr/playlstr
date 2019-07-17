@@ -207,6 +207,10 @@ def create_track(request):
         return HttpResponse('similar\n{}\n{}\n{}\n{}'.format(track.track_id, track.title, track.artist, track.album))
     try:
         track = create_custom_track(request.POST)
+        if request.COOKIES.get('spotify-token'):
+            match_track_spotify(track, request.COOKIES.get('spotify-token'))
+        match_track_gplay(track)
+        match_track_deezer(track)
         return HttpResponse('{}\n{}\n{}\n{}'.format(track.track_id, track.title, track.artist, track.album))
     except KeyError:
         return HttpResponse('Invalid', status=400)

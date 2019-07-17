@@ -4,7 +4,8 @@
 - Import existing playlists from Spotify
 - Import local playlists using local audio file metadata with the desktop client
 - Upload local playlist files to import (using filenames to try to find matching tracks)
-- Export playlists as text files of tracks
+- Export playlists as list of tracks
+- Export playlists to Spotify
 - Easily add entire albums to playlists
 - Granular playlist exporting
     - Exclude specific genres, albums, or artists or explicit tracks

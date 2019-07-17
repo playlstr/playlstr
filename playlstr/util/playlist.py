@@ -82,6 +82,10 @@ def client_import_parse(name: str, tracks: list) -> str:
     index = 0
     for t in tracks:
         track = add_track_by_metadata(t)
+        if track.deezer_id is None:
+            match_track_deezer(track)
+        if track.gplay_id is None:
+            match_track_gplay(track)
         # TODO handle duplicate tracks
         PlaylistTrack.objects.create(track=track, playlist=playlist, index=index)
         index += 1
