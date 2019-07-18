@@ -1,4 +1,5 @@
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -36,6 +37,7 @@ def spotify_import(request):
     return HttpResponse(result)
 
 
+@login_required
 def create_playlist(request):
     name = request.POST['name']
     new_list = Playlist.objects.create()
@@ -116,9 +118,8 @@ def local_file_import(request):
     return HttpResponse(status=400, reason='Malformed or empty playlist') if result == 'fail' else HttpResponse(result)
 
 
+@login_required
 def file_export(request):
-    if not request.user.is_authenticated:
-        return HttpResponse('Unauthorized', status=401)
     if 'playlist_id' not in request.POST:
         return HttpResponse('Invalid', status=400)
     try:
@@ -167,9 +168,8 @@ def export_playlist(request, playlist_id):
                                                     })
 
 
+@login_required()
 def my_profile(request):
-    if not request.user or not request.user.is_authenticated:
-        return HttpResponse('Not logged in', status=404)
     return redirect('/profile/{}/'.format(request.user.id))
 
 
@@ -182,9 +182,8 @@ def profile(request, user_id):
                    'editable_playlists': Playlist.objects.filter(editors__id=user_id).all()})
 
 
+@login_required
 def fork_playlist(request, playlist_id):
-    if not request.user.is_authenticated:
-        return HttpResponse('Not logged in', status=403)
     try:
         old_list = Playlist.objects.get(playlist_id=playlist_id)
     except ObjectDoesNotExist:
@@ -198,6 +197,7 @@ def fork_playlist(request, playlist_id):
     return redirect(new_list.get_absolute_url())
 
 
+@login_required
 def create_track(request):
     if not request.is_ajax() or not request.POST or 'title' not in request.POST or request.POST['title'] is None:
         return HttpResponse('Invalid', status=400)
@@ -267,3 +267,29 @@ def client_import(request):
         except KeyError:
             name = None
         return HttpResponse(client_import_parse(name, tracks))
+
+
+@login_required
+def client_code(request):
+    return render(request, 'playlstr/link.html',
+                  {'link_code': PlaylstrUser.objects.get(id=request.user.id).get_link_code()})
+
+
+@csrf_exempt
+def client_link(request):
+    print(request.POST)
+    link_code = request.POST.get('link')
+    print(link_code)
+    client_id = request.POST.get('client')
+    if client_id is None or len(client_id) != 20:
+        return HttpResponse('Invalid client id', status=400)
+    if link_code is None:
+        return HttpResponse('No link code given', status=400)
+    user = PlaylstrUser.objects.filter(link_code=link_code).first()
+    if user is None:
+        return HttpResponse('Invalid link code', status=400)
+    if (timezone.now() - user.link_code_generated).total_seconds() > 120000:
+        return HttpResponse('Code expired', status=400)
+    user.linked_clients.append(client_id)
+    user.save()
+    return HttpResponse('Success')

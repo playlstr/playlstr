@@ -42,5 +42,7 @@ urlpatterns = [
     path('fork/<int:playlist_id>/', views.fork_playlist, name='fork_playlist'),
     path('create-track/', views.create_track, name='create_track'),
     path('search/', views.search, name='playlist_search'),
-    path('spotify-export/', views.export_spotify, name='spotify_export')
+    path('spotify-export/', views.export_spotify, name='spotify_export'),
+    path('link/', views.client_code, name='link'),
+    path('client-link/', views.client_link, name='client_link')
 ]
