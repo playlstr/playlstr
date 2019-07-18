@@ -2,23 +2,25 @@
 {% load static %}
 {% block head %}
     <title>Link</title>
-    <script src="{% static 'js/link.js' %}"></script>
+    <script src="{% static 'js/link.js' %}" onload="initLinkPage();"></script>
 {% endblock %}
 {% block content %}
     {% if link_code %}
         <div class="container centered">
             Use the 6 digit code below to link a client to your account.<br><br>
             <h3>{{ link_code }}</h3><br>
-            <div class="alert-danger hidden">Error linking account. Try again.</div>
+            <div class="codeValidFor">
+                Code valid for
+                <div id="timeUntilRefresh" style="display: inline-block;">120</div>
+                more seconds
+            </div>
+            <div class="alert-danger hidden" id="clearFailed">Error unlinking clients. Try again.</div>
+            <div class="alert-success hidden" id="clearSuccess">Clients unlinked</div>
             <br><br><br>
             <button type="button" class="btn btn-danger"
                     onclick="if(confirm('Unlink all clients which are linked with your account?')) {clearLinkedAccounts();}">
                 Unlink linked clients
             </button>
-            <!-- Reload page after 2 minutes to get a new link code -->
-            <script type="text/javascript">setTimeout(function () {
-                window.location.reload(true)
-            }, 120000);</script>
         </div>
     {% else %}
         Please log in to link to the client.
