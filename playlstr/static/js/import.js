@@ -2,8 +2,6 @@ let userPlaylistsOffset = 0;
 
 function importSpotifyUrl(import_url = '') {
     if (import_url === '') import_url = document.getElementById('spotifyImportInput').value;
-    console.log(import_url);
-    let location = document.location.toString();
     if (spotifyAccessToken === null) {
         alert('Authenticate with Spotify first');
         return;
@@ -18,23 +16,22 @@ function importSpotifyUrl(import_url = '') {
     if (spotifyAccessToken === null) spotifyImportFail();
     $.ajax({
         type: 'POST',
-        url: location.substring(0, location.indexOf('/import/') + 8) + 'spotify/',
+        url: getPathUrl('/import/spotify'),
         headers: {'X-CSRFToken': csrfToken},
         cache: false,
         timeout: 30000,
         data: {'playlist_url': import_url, 'access_token': spotifyAccessToken},
         error: spotifyImportFail,
         success: spotifyImportComplete,
-        dataType: 'text'
     });
 }
 
 function spotifyImportComplete(data) {
-    window.location = 'http://' + window.location.host + '/list/' + data;
+    window.location.href = '/list/{0}'.format(data);
 }
 
-function spotifyImportFail(data) {
-    $('spotifyImportFailed').show();
+function spotifyImportFail() {
+    $('spotifyImportFailed').fadeIn().delay(4000).fadeOut();
 }
 
 function importPlaylistFile(fileInput) {
@@ -49,20 +46,18 @@ function importPlaylistFile(fileInput) {
 function sendPlaylistImportRequest(callback) {
     $.ajax({
         type: 'POST',
-        url: 'http://' + window.location.host + '/local-import/',
+        url: getPathUrl('/local-import/'),
         headers: {'X-CSRFToken': csrfToken},
         cache: false,
         timeout: 30000,
         data: {'name': callback.target.fileName, 'playlist': callback.target.result},
         error: localImportFail,
         success: spotifyImportComplete,
-        dataType: 'text'
     });
 }
 
-function localImportFail(error) {
-    // TODO
-    console.log(error);
+function localImportFail() {
+    $('playlistFileImportFailed').fadeIn().delay(4000).fadeOut();
 }
 
 function appendUserSpotifyPlaylists(playlists, more_button_exists = false, create_more_button = false) {

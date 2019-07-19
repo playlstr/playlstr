@@ -47,7 +47,11 @@
             </div>
         </div>
         <div id="playlist" class="container-fluid">
-            <h1 style="padding: 50px;" class="text-center" id="playlistName">{{ playlist.name }}</h1>
+            <h1 class="text-center" id="playlistName">{{ playlist.name }}</h1>
+            {% if playlist.owner %}
+                <h3 class="text-center" id="playlistName">by <a
+                        href="/profile/{{ playlist.owner_id }}/">{{ playlist.owner }}</a></h3>
+            {% endif %}
             <div id="playlistButtons">
                 <div id="editControlButtons" class="row vmargin-sm">
                     {% if user.is_authenticated %}
@@ -188,10 +192,6 @@
                         <td>{{ track.artist }}</td>
                         <td>{{ track.album }}</td>
                         <td style="white-space: nowrap;">
-                            <button type="button" class="btn btn-dark btn-padding-h"
-                                    onclick="downloadTrack({{ track.track_id }})" style="display: inline;">
-                                <i class="fa fa-download"></i>
-                            </button>
                             {% if track.youtube_id is not None %}
                                 <a class="btn youtube btn-padding-h"
                                    href="https://www.youtube.com/watch?v={{ track.youtube_id }}">

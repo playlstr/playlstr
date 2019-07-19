@@ -40,6 +40,9 @@
     <div id="playlistFileImportForm" class="form-group">
         <label for="playlistFile">Local file</label>
         <input type="file" class="form-control-file" id="playlistFile" onchange="importPlaylistFile(this);">
+        <div id="playlistFileImportFailed" class="alert alert-danger hidden">
+            Failed to import playlist
+        </div>
     </div>
     <script>
         loc = window.location.toString();

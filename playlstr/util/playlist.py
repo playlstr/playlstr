@@ -3,6 +3,12 @@ from .track import *
 
 
 def playlist_add_track(playlist: Playlist, track: Track) -> PlaylistTrack:
+    """
+    Add a track to a playlist and return the new PlaylistTrack
+    :param playlist: playlist to add the track to
+    :param track: track to add to playlist
+    :return: newly created PlaylistTrack
+    """
     try:
         return PlaylistTrack.objects.get(playlist=playlist, track=track)
     except ObjectDoesNotExist:
@@ -11,7 +17,12 @@ def playlist_add_track(playlist: Playlist, track: Track) -> PlaylistTrack:
         return PlaylistTrack.objects.create(playlist=playlist, track=track, index=index)
 
 
-def update_playlist(data: dict) -> str:
+def update_playlist(data: dict) -> Optional[str]:
+    """
+    Update playlist with data from playlist edit view
+    :param data: dict of data to add to playlist
+    :return: error message if an error occurred else None
+    """
     changed = False
     # Validate spotify token before changing anything in the DB
     spotify_ids = []
@@ -74,11 +85,18 @@ def update_playlist(data: dict) -> str:
     if changed:
         playlist.edit_date = timezone.now()
         playlist.save()
-    return 'success'
+    return None
 
 
-def client_import_parse(name: str, tracks: list) -> str:
-    playlist = Playlist.objects.create(name=name)
+def client_import_parse(name: str, tracks: list, user: PlaylstrUser) -> int:
+    """
+    Create a playlist from list of track metadata and return its id
+    :param name: playlist name
+    :param tracks: list of dicts of track metadata
+    :param user: the user who should own the playlist
+    :return: playlist_id of created playlist
+    """
+    playlist = Playlist.objects.create(name=name, owner=user)
     index = 0
     for t in tracks:
         track = add_track_by_metadata(t)
@@ -92,13 +110,30 @@ def client_import_parse(name: str, tracks: list) -> str:
     return playlist.playlist_id
 
 
-def import_playlist_from_string(filename: str, playlist: str, user: PlaylstrUser) -> str:
+def import_playlist_from_string(filename: str, playlist: str, user: PlaylstrUser) -> Optional[int]:
+    """
+    Import a playlist from a string formatted as a playlist file
+    :param filename: name of playlist file being imported
+    :param playlist: string containing a playlist file in its entirety
+    :param user: the user who should own the newly created playlist
+    :return: playlist_id of newly created playlist or None if the playlist to be imported was empty or malformed
+    """
     name, filetype = filename.rsplit('.')
     if filetype == 'm3u' or filetype == 'm3u8':
         return create_playlist_from_m3u(name, playlist, user)
 
 
-def create_playlist_from_m3u(name: str, playlist: str, user: PlaylstrUser, ext_overrides_guess: bool = True) -> str:
+def create_playlist_from_m3u(name: str, playlist: str, user: PlaylstrUser, ext_overrides_guess: bool = True) -> \
+        Optional[int]:
+    """
+    Create a playlist from an m3u file
+    :param name: name of the m3u file
+    :param playlist: m3u file as a string
+    :param user: user who will own the created playlist
+    :param ext_overrides_guess: if true then if the file is an m3uext file the metadata given in the playlist file takes
+     precedence over the metadata guessed from the file name and path
+    :return: the new playlist's id if the file was valid else None
+    """
     lines = playlist.splitlines()
     if lines[0] == '#EXTM3U':
         ext = True
@@ -145,4 +180,4 @@ def create_playlist_from_m3u(name: str, playlist: str, user: PlaylstrUser, ext_o
                 playlist.owner = user
                 playlist.save()
             playlist_add_track(playlist, track)
-    return 'fail' if playlist is None else playlist.playlist_id
+    return None if playlist is None else playlist.playlist_id

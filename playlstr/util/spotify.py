@@ -88,6 +88,11 @@ def track_from_spotify_json(track_json: dict) -> Track:
 
 
 def valid_spotify_token(token: str) -> bool:
+    """
+    Return true iff token is a valid Spotify access token
+    :param token: access token to test
+    :return: whether token is a valid Spotify access token
+    """
     test_url = 'https://api.spotify.com/v1/tracks/11dFghVXANMlKmJXsNCbNl'
     headers = {'Authorization': 'Bearer {}'.format(token)}
     response = requests.get(test_url, headers=headers)
@@ -95,6 +100,12 @@ def valid_spotify_token(token: str) -> bool:
 
 
 def get_user_spotify_token(user: PlaylstrUser) -> dict:
+    """
+    Get Spotify access token and expiry of the user PlaylstrUser
+    :param user: user to get access token of
+    :return: dict containing access token and time from now until the access token expires on success or an error
+    reason at the key 'error'
+    """
     if not user.spotify_linked():
         return {'error': 'unauthorized'}
     if user.spotify_token_expiry is None or user.spotify_token_expiry <= timezone.now():
@@ -105,7 +116,12 @@ def get_user_spotify_token(user: PlaylstrUser) -> dict:
             'expires_in': floor((user.spotify_token_expiry - timezone.now()).total_seconds())}
 
 
-def spotify_parse_code(info: dict) -> str:
+def spotify_parse_code(info: dict) -> Optional[str]:
+    """
+    Set up access token and refresh token for user given access code
+    :param info: the post data for the spotify code parsing and the user who the code corresponds to
+    :return: None on success or an error reason on failure
+    """
     data = info['post']
     user = info['user']
     headers = {'Authorization': 'Basic {}'.format(
@@ -113,7 +129,7 @@ def spotify_parse_code(info: dict) -> str:
     body = {'grant_type': 'authorization_code', 'code': data['code'], 'redirect_uri': data['redirect_uri']}
     response = requests.post('https://accounts.spotify.com/api/token', headers=headers, data=body)
     if response.status_code != 200:
-        return response.reason
+        return response.text
     try:
         info = response.json()
     except json.JSONDecodeError:
@@ -127,30 +143,45 @@ def spotify_parse_code(info: dict) -> str:
     try:
         user.spotify_token_expiry = timezone.now() + timezone.timedelta(seconds=int(info['expires_in']))
     except ValueError:
-        return ''
+        return 'Invalid expiry date'
     user.update_spotify_info()
     user.save()
+    return None
 
 
-def spotify_create_playlist(playlist_id: int, access_token: str, user_spotify_id: str, public: bool = True,
+def spotify_create_playlist(playlist_name: str, access_token: str, user_spotify_id: str, public: bool = True,
                             description: str = None) -> str:
-    playlist = Playlist.objects.get(playlist_id=playlist_id)
+    """
+    Create a playlist on Spotify
+    :param playlist_name: name of the playlist
+    :param access_token: Spotify access token to create playlist with
+    :param user_spotify_id: Spotify id of user who will own the playlist
+    :param public: whether the playlist should be public
+    :param description: description of the playlist on spotify
+    :return: spotify id of created playlist or an error message starting with 'Error ' on error
+    """
     headers = {'Authorization': 'Bearer {}'.format(access_token),
                'Content-Type': 'application/json'}
-    body = {'name': playlist.name, 'public': public}
+    body = {'name': playlist_name, 'public': public}
     if description is not None:
         body['description'] = description
     response = requests.post('https://api.spotify.com/v1/users/{}/playlists'.format(user_spotify_id), headers=headers,
                              json=body)
     if response.status_code != 200 and response.status_code != 201:
-        return 'Error {}'.format(response.reason)
+        return 'Error {}'.format(response.text)
     return response.json()['id']
 
 
-def add_tracks_to_spotify_playlist(tracks: list, playlist_spotify_id: str, access_token: str):
+def add_tracks_to_spotify_playlist(tracks: list, playlist_spotify_id: str, access_token: str) -> Optional[str]:
+    """
+    Add list of tracks to spotify playlist
+    :param tracks: list of Track to add to the playlist
+    :param playlist_spotify_id: spotify id of the playlist
+    :param access_token: Spotify access token of user who can add tracks to the playlist
+    :return: error reason on failure or None on success
+    """
     headers = {'Authorization': 'Bearer {}'.format(access_token),
                'Content-Type': 'application/json'}
-    print(playlist_spotify_id)
     # Add tracks 100 at a time per Spotify API docs
     for i in range(0, len(tracks), 100):
         last = min(i + 100, len(tracks))
@@ -163,14 +194,19 @@ def add_tracks_to_spotify_playlist(tracks: list, playlist_spotify_id: str, acces
         response = requests.post('https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_spotify_id),
                                  headers=headers, json={'uris': uris})
         if response.status_code != 200 and response.status_code != 201:
-            print('Error: {} (processing tracks {} to {})'.format(response.text, i, last))
-            return False
+            return 'Error: {}'.format(response.text)
         if last == len(tracks):
             break
-    return True
+    return None
 
 
 def spotify_playlist_as_json_tracks(playlist_id: int, access_token: str) -> list:
+    """
+    Return list of track json for all tracks in Spotify playlist
+    :param playlist_id: Spotify id of playlist to get
+    :param access_token: Spotify access token of user with access to the playlist
+    :return: list of dicts which are spotify track json objects
+    """
     query_url = 'https://api.spotify.com/v1/playlists/{}/tracks'.format(playlist_id)
     query_headers = {'Authorization': 'Bearer {}'.format(access_token)}
     # Get playlist tracks
@@ -190,6 +226,11 @@ def spotify_playlist_as_json_tracks(playlist_id: int, access_token: str) -> list
 
 
 def spotify_id_from_token(access_token: str) -> Optional[str]:
+    """
+    Return Spotify ID of the user corresponding to access token or None on error
+    :param access_token: access token to get spotify ID of
+    :return: Spotify id of access token or None if an error occurred
+    """
     if access_token is None:
         return None
     headers = {'Authorization': 'Bearer {}'.format(access_token)}
@@ -203,6 +244,12 @@ def spotify_id_from_token(access_token: str) -> Optional[str]:
 
 
 def spotify_track_search(query: str, access_token: str) -> dict:
+    """
+    Get results of spotify search for query
+    :param query: query to send to spotify
+    :param access_token: access token to search with
+    :return: dict containing spotify track json objects or 'error' and 'status' on error
+    """
     response = requests.get('https://api.spotify.com/v1/search?q={}&type=track'.format(query),
                             headers={'Authorization': 'Bearer {}'.format(access_token)})
     if response.status_code == 200 and 'tracks' in response.text and 'items' in response.text:

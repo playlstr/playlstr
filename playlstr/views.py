@@ -87,7 +87,10 @@ def playlist_update(request):
         return HttpResponse("Invalid", status=400)
     if request.user not in plist.editors.all() and request.user != plist.owner:
         return HttpResponse("Unauthorized", status=401)
-    return HttpResponse(update_playlist(request.POST))
+    update_result = update_playlist(request.POST)
+    if update_result:
+        return HttpResponse(update_result, status=400)
+    return HttpResponse('success')
 
 
 def logout_view(request):
@@ -250,7 +253,9 @@ def export_spotify(request):
         tracks = PlaylistTrack.objects.filter(playlist=request.POST['playlist_id']).values('track')
     if len(tracks) == 0:
         return HttpResponse('Empty playlist', status=400)
-    spotify_playlist = spotify_create_playlist(request.POST.get('playlist_id'), access_token, spotify_id)
+
+    spotify_playlist = spotify_create_playlist(Playlist.objects.get(playlist_id=request.POST.get('playlist_id')).name,
+                                               access_token, spotify_id)
     if spotify_playlist.startswith('Error'):
         return HttpResponse('Couldn\'t create playlist: '.format(spotify_playlist), status=500)
     if not add_tracks_to_spotify_playlist(tracks, spotify_playlist, access_token):
@@ -260,6 +265,11 @@ def export_spotify(request):
 
 @csrf_exempt
 def client_import(request):
+    if not request.POST.get('client_id'):
+        return HttpResponse('No client id', status=400)
+    user = PlaylstrUser.objects.filter(linked_clients__contains=[request.POST['client_id']]).first()
+    if user is None:
+        return HttpResponse('No user linked to client', status=400)
     try:
         tracks = json.loads(request.POST['tracks'])
     except KeyError:
@@ -271,7 +281,7 @@ def client_import(request):
             name = request.POST['playlist_name']
         except KeyError:
             name = None
-        return HttpResponse(client_import_parse(name, tracks))
+        return HttpResponse(client_import_parse(name, tracks, user))
 
 
 def client_code(request):

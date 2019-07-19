@@ -5,6 +5,12 @@ import mutagen as mu
 
 
 def import_m3u(file: TextIOWrapper, args: dict) -> list:
+    """
+    Return a list of files in the playlist and their information
+    :param file: the m3u file
+    :param args: additional options
+    :return:
+    """
     first = file.readline().rstrip()
     if first == '#EXTM3U':
         ext = True

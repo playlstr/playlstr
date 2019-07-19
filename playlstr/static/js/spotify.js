@@ -33,7 +33,6 @@ function parseUserSpotifyToken(data) {
     let expiryDate = new Date();
     expiryDate.setSeconds(expiryDate.getSeconds() + parseInt(data['expires_in']));
     document.cookie = 'spotify-token=' + data['access_token'] + '; expires=' + expiryDate.toString() + '; path=/';
-    console.log(data);
     hideSpotifyAuth();
 }
 
@@ -66,7 +65,7 @@ function parseSpotifyAccessTokenFromLocationLoggedIn(redirect = false) {
     let token = location.substring(access_token_start, access_token_end);
     $.ajax({
         type: 'POST',
-        url: 'http://' + window.location.host + '/spotify-auth-user/',
+        url: getPathUrl('/spotify-auth-user/'),
         headers: {'X-CSRFToken': csrfToken},
         data: {
             'code': token,
@@ -144,7 +143,7 @@ function getUserSpotifyPlaylists(first_call = false) {
     if (spotifyAccessToken === null || userSpotifyId === null) return;
     $.ajax({
         type: 'GET',
-        url: 'https://api.spotify.com/v1/users/' + userSpotifyId + '/playlists',
+        url: 'https://api.spotify.com/v1/users/{0}/playlists'.format(userSpotifyId),
         data: {'offset': userPlaylistsOffset, 'limit': 20},
         dataType: 'json',
         headers: {'Authorization': 'Bearer ' + spotifyAccessToken},

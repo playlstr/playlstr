@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from django.db.models import Q, ObjectDoesNotExist
 from django.utils.dateparse import parse_datetime
@@ -10,8 +11,12 @@ from playlstr.util.gplay import gplay_search
 
 
 def add_track_by_metadata(data: dict) -> Track:
-    if 'title' not in data:
-        return None
+    """
+    Create a track from given metadata
+    :param data: track metadata
+    :return: newly created Track
+    """
+    assert 'title' in data
     if 'isrc' in data:
         try:
             track = Track.objects.get(isrc=data['isrc'])
@@ -43,6 +48,11 @@ def add_track_by_metadata(data: dict) -> Track:
 
 
 def update_track_with_file_metadata(track: Track, data: dict) -> None:
+    """
+    Update Track to match metadata
+    :param track: track to update
+    :param data: metadata to update to
+    """
     if 'title' in data:
         track.title = data['title']
     if 'artist' in data:
@@ -69,6 +79,11 @@ def update_track_with_file_metadata(track: Track, data: dict) -> None:
 
 
 def create_custom_track(info: dict) -> Track:
+    """
+    Create and return a track matching metadata
+    :param info: track metadata
+    :return: newly created Track
+    """
     track = Track.objects.create(title=info['title'])
     if 'artist' in info:
         track.artist = info['artist']
@@ -88,6 +103,11 @@ def create_custom_track(info: dict) -> Track:
 
 
 def guess_info_from_path(file_path: str) -> dict:
+    """
+    Return a guess of what the track metadata might be based on the path to the file
+    :param file_path: path of the file to guess the info from
+    :return: guessed metadata of file
+    """
     info = {}
     # Get path as a valid unix path
     file_path = file_path.lstrip().rstrip()
@@ -255,4 +275,5 @@ def match_track_gplay(track: Track, match_title=True, match_artist=True) -> bool
 
 
 def get_similar_track(track_info: dict) -> Track:
-    return None
+    # TODO
+    raise ValueError('Unimplemented')

@@ -35,27 +35,26 @@ function removeExcludedArtist(artist) {
     $('#artistExcludeSelect').append($(new Option(artist, artist)).html(artist));
 }
 
-function exportAsText() {
-    let criteria = JSON.stringify({
+function getCriteriaString() {
+    return JSON.stringify({
         'excluded_genres': getExcludedGenres(),
         'explicit': $('#explicitCheck').is(':checked'),
         'excluded_artists': excludedArtists,
         'excluded_albums': excludedAlbums
     });
+}
+
+function exportAsText() {
     $.ajax({
         type: 'POST',
-        url: 'http://' + window.location.host + '/file-export/',
-        data: {'playlist_id': playlist_id, 'filetype': 'text', 'criteria': criteria},
+        url: getPathUrl('/file-export/'),
+        data: {'playlist_id': playlist_id, 'filetype': 'text', 'criteria': getCriteriaString()},
         headers: {'X-CSRFToken': csrfToken},
         success: function (result) {
-            console.log('success');
-            console.log(result);
             let blob = new Blob([result], {type: 'text/plain'});
             window.location = URL.createObjectURL(blob);
         },
-        error: function () {
-            exportFail();
-        }
+        error: exportFail
     });
 }
 
@@ -65,16 +64,10 @@ function getExcludedGenres() {
 }
 
 function exportToSpotify() {
-    let criteria = JSON.stringify({
-        'excluded_genres': getExcludedGenres(),
-        'explicit': $('#explicitCheck').is(':checked'),
-        'excluded_artists': excludedArtists,
-        'excluded_albums': excludedAlbums
-    });
     $.ajax({
         type: 'POST',
-        url: 'http://' + window.location.host + '/spotify-export/',
-        data: {'playlist_id': playlist_id, 'criteria': criteria},
+        url: getPathUrl('/spotify-export/'),
+        data: {'playlist_id': playlist_id, 'criteria': getCriteriaString()},
         headers: {'X-CSRFToken': csrfToken},
         success: function (result) {
             window.location = result;
@@ -86,5 +79,3 @@ function exportToSpotify() {
 function exportFail(data) {
     $('#exportError').text('Unable to export playlist (' + data.responseText + ')').fadeIn().delay(4000).fadeOut();
 }
-
-

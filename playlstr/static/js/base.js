@@ -10,15 +10,22 @@ String.prototype.format = String.prototype.f = function () {
     return s;
 };
 
+function getPathUrl(path) {
+    let url = window.location.protocol.toString() + '//' + window.location.host.toString() + (path[0] === '/' ? path : '/' + path);
+    if (url[url.length - 1] !== '/') {
+        console.log('adding / to url');
+        console.log(url);
+        url += '/';
+    }
+    return url;
+}
 
 function createPlaylist() {
     $('#createPlaylistFail').hide();
-    let location = 'http://' + window.location.host.toString() + '/';
-    if (document.cookie.length === 0) createPlaylistFail();
     let playlistName = $('#newPlaylistName').val();
     $.ajax({
         type: 'POST',
-        url: location + 'create/',
+        url: getPathUrl('create'),
         headers: {'X-CSRFToken': csrfToken},
         cache: false,
         timeout: 30000,
@@ -29,12 +36,12 @@ function createPlaylist() {
     });
 }
 
-function createPlaylistFail(data) {
+function createPlaylistFail() {
     $('#createPlaylistFail').show();
 }
 
 function createPlaylistSuccess(data) {
-    window.location = 'http://' + window.location.host + '/list/' + data;
+    window.location.href = '/list/{0}/'.format(data);
 }
 
 function searchClicked() {

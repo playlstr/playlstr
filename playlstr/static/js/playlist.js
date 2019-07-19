@@ -17,7 +17,7 @@ function deleteTrack(track_id) {
     let newIndex = newTracks.indexOf(track_id);
     if (newIndex === -1) {
         deletedTracks.push(track_id);
-        $("#" + track_id + "track").hide();
+        $('#{0}track'.format(track_id)).hide();
     } else {
         newTracks.splice(newIndex, 1);
         $('#newTrack' + track_id).remove();
@@ -49,7 +49,7 @@ function exitEditMode(save = false) {
         if (document.cookie.length === 0) return;
         $.ajax({
             type: 'POST',
-            url: 'http://' + window.location.host + '/playlist-update/',
+            url: getPathUrl('/playlist-update/'),
             headers: {'X-CSRFToken': csrfToken},
             data: {
                 'playlist': playlist_id,
@@ -102,7 +102,7 @@ function initTrackAutocomplete() {
 function getTrackSearchResults(term, start = 0, count = 0) {
     $.ajax({
         type: 'POST',
-        url: 'http://' + window.location.host + '/track-autocomplete/',
+        url: getPathUrl('/track-autocomplete/'),
         headers: {'X-CSRFToken': csrfToken},
         data: {'term': term},
         success: function (unparsed) {
@@ -110,9 +110,7 @@ function getTrackSearchResults(term, start = 0, count = 0) {
             table_body.empty();
             appendTrackSearchResults(unparsed, table_body);
         },
-        error: function () {
-            getTrackResultsFail();
-        }
+        error: getTrackResultsFail
     });
 }
 
@@ -133,7 +131,6 @@ function appendTrackSearchResults(unparsed_results, search_results_div) {
                 track.id, track.title, track.artist, track.album);
             $(search_results_div).append(new_row);
         }
-
     }
 }
 
@@ -307,19 +304,9 @@ function deleteNewSpotifyTrack(spotify_id) {
     if (index !== -1) newSpotifyTracks.splice(index, 1);
     if (newTracks.length === 0 && newSpotifyTracks.length === 0) {
         $('#newTracksWarning').hide();
-    } else {
-        console.log(newTracks)
     }
 }
 
-function showNewTrackDialog() {
-    // TODO
-    console.log("new");
-}
-
-function downloadTrack(track) {
-    // TODO
-}
 
 function searchDefault() {
     searchPlaylstr();
@@ -368,7 +355,7 @@ function addSpotifyAlbum(spotify_id) {
             appendSpotifyAlbumTracks(unparsed);
         },
         error: function (data) {
-            console.log(data);
+            // TODO
             console.log('error adding album {}'.format(spotify_id));
         }
     });
@@ -403,7 +390,7 @@ function createNewTrack() {
     if (!buf.empty) new_track['track_number'] = buf;
     $.ajax({
         type: 'POST',
-        url: 'http://' + window.location.host + '/create-track/',
+        url: getPathUrl('/create-track/'),
         headers: {'X-CSRFToken': csrfToken},
         data: new_track,
         success: newTrackCreateResponse,
@@ -433,7 +420,3 @@ function newTrackCreateFail() {
     console.log('Error creating track');
 }
 
-function newTrackError() {
-    // TODO
-    console.log('error creating track');
-}

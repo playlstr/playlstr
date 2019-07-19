@@ -112,7 +112,8 @@ if __name__ == '__main__':
         with open(playlist) as file:
             tracks = parse_method(file, args)
         response = requests.post('{}/client-import/'.format(args['url']),
-                                 data={'playlist_name': name, 'tracks': json.dumps(tracks)})
+                                 data={'playlist_name': name, 'tracks': json.dumps(tracks),
+                                       'client_id': settings['id']})
         if response.status_code != 200:
             print('Error adding {}: {}'.format(playlist, response.reason))
         else:
