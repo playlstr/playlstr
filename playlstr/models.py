@@ -24,7 +24,7 @@ class PlaylstrUser(AbstractUser):
     spotify_access_token = models.CharField(max_length=256, null=True, blank=True)
     spotify_refresh_token = models.CharField(max_length=256, null=True, blank=True)
     spotify_token_expiry = models.DateTimeField(null=True, blank=True)
-    linked_clients = ArrayField(models.CharField(max_length=6, null=False, blank=False), null=False, default=list)
+    linked_clients = ArrayField(models.CharField(max_length=20, null=False, blank=False), null=False, default=list)
     link_code = models.CharField(max_length=6, null=True, blank=True)
     link_code_generated = models.DateTimeField(null=True, blank=True)
 

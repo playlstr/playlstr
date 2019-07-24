@@ -44,8 +44,8 @@ function createPlaylistSuccess(data) {
     window.location.href = '/list/{0}/'.format(data);
 }
 
-function searchClicked() {
-    let query = document.getElementById('playlistSearch').value;
+function searchPlaylists() {
+    let query = $('.searchInput').last().val();
     if (query.length === 0) {
         return;
     }

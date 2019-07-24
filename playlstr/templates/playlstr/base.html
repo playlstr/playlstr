@@ -3,8 +3,7 @@
 {% load static %}
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet"
-          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="{% static 'js/popper.min.js' %}"></script>
@@ -14,14 +13,15 @@
     <script type="text/javascript">
         let csrfToken = '{{ csrf_token }}';
         let state = '';
-        {% if user.is_authenticated %}
-            const authenticated = true;
-        {% else %}
-            const authenticated = false;
-        {% endif %}
+        const authenticated = {% if user.is_authenticated %}true{% else %}false{% endif %};
+        // Set up search popover in navbar
+        $(function () {
+            $('#searchNav').popover({content: $('#playlistSearchPopout').clone(), html: true, trigger: 'manual'});
+        });
     </script>
     <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
-    <script src="{% static 'js/base.js' %}"></script>
+    <script src = "{% static 'js/base.js' %}" ></script>
+    <script src="{% static 'js/bootstrap-tooltip.js' %}"></script>
     {% block head %}
     {% endblock %}
 </head>
@@ -39,16 +39,28 @@
             <li class="nav-item">
                 <a class="nav-link text-bg-light" href="/link">Link</a>
             </li>
-            <li class="nav-item"
-                onmouseenter="$('#playlistSearchForm').fadeIn(200); document.getElementById('playlistSearch').select(); searchHovered = true;"
-                onmouseleave="searchHovered = false; setTimeout(function() {if (!searchHovered) $('#playlistSearchForm').fadeOut(200);}, 250)">
-                <form class="form-inline my-2 my-lg-0 hidden" id="playlistSearchForm" style="float: left;"
-                      onsubmit="searchClicked();return false;">
-                    <input id="playlistSearch" class="form-control mr-sm-2" type="search" placeholder="Search"
-                           aria-label="Search">
-                </form>
-                <a style="float: right;" class="nav-link" href="#" onclick="searchClicked();return false;">Search</a>
+            <li class="nav-item">
+                <a tabindex="0" data-html="true" onclick="return false;" href="#" id="searchNav" data-placement="bottom"
+                   class="nav-link" data-toggle="popover"
+                   onmouseenter="if (!searchHovered) {
+                            $(this).popover('show');
+                    } searchHovered = true;"
+                   onmouseleave="searchHovered = false; setTimeout(function() {if (!searchHovered) {$('#searchNav').popover('hide');}}, 400)">Search</a>
+                <div class="hidden">
+                    <div id="playlistSearchPopout" class="input-group" onmouseenter="searchHovered = true;"
+                         onmouseleave="searchHovered = false; setTimeout(function() {if (!searchHovered) {$('#searchNav').popover('hide');}}, 400)">
+                        <form class="form-inline" onsubmit="searchPlaylists(); return false;">
+                            <input class="searchInput" type="text">
+                            <button id="searchPlaylistsButton" class="btn btn-primary btn-sm" type="submit"
+                                    onclick="searchPlaylists();">Search
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </li>
+        </ul>
+        <ul>
+
         </ul>
     </div>
     <div class="col-sm-4 mx-auto navbar-nav navbar-padding">

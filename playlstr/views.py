@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from playlstr.util.export import *
+from playlstr.util.client import *
 from .settings import LOGOUT_REDIRECT_URL
 
 
@@ -286,28 +287,23 @@ def client_import(request):
 
 def client_code(request):
     if not request.user or not request.user.is_authenticated:
-        return HttpResponse('Login first', status=400)
+        return HttpResponse('Login first', status=401)
     return render(request, 'playlstr/link.html',
                   {'link_code': PlaylstrUser.objects.get(id=request.user.id).get_link_code()})
 
 
 @csrf_exempt
 def client_link(request):
-    print(request.POST)
     link_code = request.POST.get('link')
-    print(link_code)
     client_id = request.POST.get('client')
-    if client_id is None or len(client_id) != 20:
+    if client_id is None:
         return HttpResponse('Invalid client id', status=400)
     if link_code is None:
         return HttpResponse('No link code given', status=400)
-    user = PlaylstrUser.objects.filter(link_code=link_code).first()
-    if user is None:
-        return HttpResponse('Invalid link code', status=400)
-    if (timezone.now() - user.link_code_generated).total_seconds() > 120000:
-        return HttpResponse('Code expired', status=400)
-    user.linked_clients.append(client_id)
-    user.save()
+    try:
+        link_client_code(link_code, client_id)
+    except ValueError as e:
+        return HttpResponse(str(e), status=400)
     return HttpResponse('Success')
 
 
