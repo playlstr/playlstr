@@ -298,7 +298,6 @@ function addSpotifyTrack(spotify_id, title, artist, album) {
 }
 
 function deleteNewSpotifyTrack(spotify_id) {
-    console.log(spotify_id);
     $('#newTrack' + spotify_id).remove();
     let index = newSpotifyTracks.indexOf(spotify_id);
     if (index !== -1) newSpotifyTracks.splice(index, 1);

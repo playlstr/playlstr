@@ -107,7 +107,7 @@ def get_user_spotify_token(user: PlaylstrUser) -> dict:
     reason at the key 'error'
     """
     if not user.spotify_linked():
-        return {'error': 'unauthorized'}
+        return {'error': 'spotify not linked'}
     if user.spotify_token_expiry is None or user.spotify_token_expiry <= timezone.now():
         updated_token = user.update_spotify_tokens()
         if updated_token != 'success':

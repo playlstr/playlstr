@@ -1,6 +1,7 @@
 let spotifyAccessToken = null;
 let userSpotifyId = null;
 let SPOTIFY_REDIRECT_URI = 'http://' + window.location.host.toString() + '/spotify-redirect/';
+let successfulLink = false;
 
 function hideSpotifyAuth() {
     $(document).ready(function () {
@@ -18,16 +19,17 @@ function getNewAccessTokenLoggedIn(redirect = false) {
             if (redirect) redirectToPreauthUrl();
         },
         error: function (data) {
-            console.log(data);
+            if (successfulLink) {
+                setTimeout(function () {
+                    getNewAccessTokenLoggedIn(redirect);
+                }, 500);
+            }
+            console.log('error ' + data.toString());
         }
     });
 }
 
 function parseUserSpotifyToken(data) {
-    if (data.length < 20) {
-        return;
-    }
-    data = JSON.parse(data);
     if (data['access_token'] === undefined) return;
     spotifyAccessToken = data['access_token'];
     let expiryDate = new Date();
@@ -71,9 +73,12 @@ function parseSpotifyAccessTokenFromLocationLoggedIn(redirect = false) {
             'code': token,
             'redirect_uri': location.substring(0, access_token_start - 6)
         },
-        success: getNewAccessTokenLoggedIn(redirect),
+        success: function () {
+            successfulLink = true;
+            getNewAccessTokenLoggedIn(redirect)
+        },
         error: function (data) {
-            console.log(data);
+            console.log('error ' + data.toString());
         }
     });
 }

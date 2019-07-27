@@ -78,10 +78,9 @@
                              onmouseleave="accountHovered = false; setTimeout(function() {if (!searchHovered) {$('#accountNav').popover('hide');}}, 400)">
                             <ul class="list-group">
                                 <li class="list-group-item"><a href="/link/">Manage Clients</a></li>
-                                {% if user.spotify_token is None %}
-                                    <li class="list-group-item link-spotify-connection"><a href="#"
-                                                                                           onclick="spotifyAuthLoggedIn(); return false;"
-                                                                                           id="spotifyAuthButton">Link
+                                {% if not user.spotify_token %}
+                                    <li class="list-group-item link-spotify-connection">
+                                        <a href="#" onclick="spotifyAuthLoggedIn(); return false;" id="spotifyAuthButton">Link
                                         Spotify</a></li>{% endif %}
                             </ul>
                         </div>

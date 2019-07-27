@@ -102,7 +102,7 @@ def logout_view(request):
 def user_spotify_token(request):
     if not request.is_ajax() or request.user is None:
         return HttpResponse("Invalid", status=400)
-    json_resp = json.dumps(get_user_spotify_token(request.user))
+    json_resp = get_user_spotify_token(request.user)
     if 'error' in json_resp:
         return HttpResponse(json_resp['error'], status=400)
     return JsonResponse(json_resp, safe=False)
