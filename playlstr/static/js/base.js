@@ -1,4 +1,5 @@
 let searchHovered = false;
+let accountHovered = false;
 
 String.prototype.format = String.prototype.f = function () {
     let s = this,

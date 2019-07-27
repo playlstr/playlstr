@@ -319,3 +319,27 @@ def clear_linked_clients(request):
     user.linked_clients.clear()
     user.save()
     return HttpResponse('Success')
+
+
+@login_required
+def update_profile(request):
+    if not (request.user and request.is_ajax() and request.POST.get('changes')):
+        return HttpResponse('', status=400)
+    try:
+        user = PlaylstrUser.objects.get(id=request.user.id)
+    except ObjectDoesNotExist:
+        return HttpResponse('Invalid user', status=400)
+    try:
+        changes = json.loads(request.POST.get('changes'))
+    except (json.JSONDecodeError, KeyError):
+        return HttpResponse('Invalid changes', status=400)
+    if 'firstname' in changes:
+        user.first_name = changes['firstname']
+    if 'lastname' in changes:
+        user.last_name = changes['lastname']
+    if 'email' in changes:
+        user.email = changes['email']
+    if 'username' in changes:
+        user.username = changes['username']
+    user.save()
+    return HttpResponse('Success')

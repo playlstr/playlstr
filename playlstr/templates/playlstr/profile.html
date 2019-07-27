@@ -2,22 +2,50 @@
 {% load static %}
 {% block head %}
     <title>{{ username }}</title>
+    <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
 {% block content %}
     <div id="userInfo" class="centered bg-light">
-        <h3>{{ username }}</h3>
-        {% if my_profile %}
-            {{ user.email }}<br>
-            {{ user.first_name }} {{ user.last_name }}
-        {% endif %}
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-heading profile-info">
+            </li>
+            <li class="list-group-item profile-info">
+                <div class="h3" id="username" style="display: inline;">{{ username }}</div>
+                <input id="usernameInput" type="text" class="hidden">
+            </li>
+            <li class="list-group-item profile-info">
+                <div id="userEmail">{{ user.email }}</div>
+                <input id="userEmailInput" type="text" class="hidden">
+            </li>
+            <li class="list-group-item profile-info">
+                <div style="float: none; display: inline;" id="userFullname">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div id="userFirstname" style="display: inline;">{{ user.first_name }}</div>
+                    <div id="userLastname" style="display: inline;">
+                        {% if user.last_name %}{{ user.last_name }}{% endif %}
+                    </div>
+                </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="hidden" type="text" id="userFirstnameInput">
+                <input class="hidden" type="text" id="userLastnameInput">
+                <span style="float: right; font-size: 100%; margin-bottom: 4px;" id="enterProfileEdit">
+                    <i class="fa fa-edit" id="editProfile" onclick="enterProfileEditMode();"></i>
+                </span>
+                <span class="hidden" style="float: right; font-size: 100%; margin-bottom: 4px;" id="exitProfileEdit">
+                    <i class="fa fa-close btn-outline-danger" id="cancelProfileEdit"
+                       onclick="exitProfileEditMode(false);"></i>
+                    <i class="fa fa-check btn-outline-success" id="saveProfileEdit"
+                       onclick="exitProfileEditMode(true);"></i>
+                </span>
+            </li>
+        </ul>
     </div>
     <div id="ownedPlaylists" class="vmargin-sm">
         <ul class="list-group">
             <li class="nav-header list-group-item h3 centered" style="border: none;">Playlists</li>
             {% if owned_playlists %}
                 {% for playlist in owned_playlists %}
-                    <li class="list-group-item centered"><a
-                            href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+                    <li class="list-group-item centered">
+                        <a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a>
+                    </li>
                 {% endfor %}
             {% else %}
                 <li class="list-group-item centered">No playlists</li>
@@ -30,8 +58,9 @@
                 <li class="nav-header list-group-item h3 centered" style="border: none;">Editable Playlists</li>
                 {% if editable_playlists %}
                     {% for playlist in editable_playlists %}
-                        <li class="list-group-item centered"><a
-                                href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+                        <li class="list-group-item centered">
+                            <a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a>
+                        </li>
                     {% endfor %}
                 {% else %}
                     <li class="list-group-item centered">No playlists</li>

@@ -4,7 +4,7 @@ let SPOTIFY_REDIRECT_URI = 'http://' + window.location.host.toString() + '/spoti
 
 function hideSpotifyAuth() {
     $(document).ready(function () {
-        $('#spotifyAuthButton').hide();
+
     });
 }
 

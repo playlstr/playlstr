@@ -45,5 +45,6 @@ urlpatterns = [
     path('spotify-export/', views.export_spotify, name='spotify_export'),
     path('link/', views.client_code, name='link'),
     path('client-link/', views.client_link, name='client_link'),
-    path('clear-links/', views.clear_linked_clients, name='clear_link')
+    path('clear-links/', views.clear_linked_clients, name='clear_link'),
+    path('profile-update/', views.update_profile, name='update_profile')
 ]

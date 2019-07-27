@@ -2,6 +2,7 @@
 <html lang="en">
 {% load static %}
 <head>
+    <link rel="icon" href="{% static 'favicon.ico' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -18,9 +19,12 @@
         $(function () {
             $('#searchNav').popover({content: $('#playlistSearchPopout').clone(), html: true, trigger: 'manual'});
         });
+        $(function () {
+            $('#accountNav').popover({content: $('#accountPopout').clone(), html: true, trigger: 'manual'});
+        });
     </script>
     <script src="{% static 'js/spotify.js' %}" onload="loadSpotifyAccessToken();"></script>
-    <script src = "{% static 'js/base.js' %}" ></script>
+    <script src="{% static 'js/base.js' %}"></script>
     <script src="{% static 'js/bootstrap-tooltip.js' %}"></script>
     {% block head %}
     {% endblock %}
@@ -37,14 +41,9 @@
                 <a class="nav-item nav-link" href="/import/">Import</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-bg-light" href="/link">Link</a>
-            </li>
-            <li class="nav-item">
                 <a tabindex="0" data-html="true" onclick="return false;" href="#" id="searchNav" data-placement="bottom"
                    class="nav-link" data-toggle="popover"
-                   onmouseenter="if (!searchHovered) {
-                            $(this).popover('show');
-                    } searchHovered = true;"
+                   onmouseenter="if (!searchHovered) { $(this).popover('show'); $('.searchInput').focus(); } searchHovered = true;"
                    onmouseleave="searchHovered = false; setTimeout(function() {if (!searchHovered) {$('#searchNav').popover('hide');}}, 400)">Search</a>
                 <div class="hidden">
                     <div id="playlistSearchPopout" class="input-group" onmouseenter="searchHovered = true;"
@@ -66,12 +65,27 @@
     <div class="col-sm-4 mx-auto navbar-nav navbar-padding">
         <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" onclick="spotifyAuthLoggedIn(); return false;" id="spotifyAuthButton" href="#"
-                       style="color: #222;">Authenticate with Spotify</a>
+                <li class="navbar-item">
+                    <a class="nav-link" href="/me/">My Account</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/me/">{{ user }}</a>
+                <li class="navbar-item">
+                    <a tabindex="0" data-html="true" href="#" id="accountNav" data-placement="bottom"
+                       data-toggle="popover" class="nav-link"
+                       onmouseenter="if (!accountHovered) { $(this).popover('show'); } accountHovered = true;"
+                       onmouseleave="accountHovered = false; setTimeout(function() {if (!accountHovered) {$('#accountNav').popover('hide');}}, 400)">Connections</a>
+                    <div class="hidden">
+                        <div id="accountPopout" class="input-group" onmouseenter="accountHovered = true;"
+                             onmouseleave="accountHovered = false; setTimeout(function() {if (!searchHovered) {$('#accountNav').popover('hide');}}, 400)">
+                            <ul class="list-group">
+                                <li class="list-group-item"><a href="/link/">Manage Clients</a></li>
+                                {% if user.spotify_token is None %}
+                                    <li class="list-group-item link-spotify-connection"><a href="#"
+                                                                                           onclick="spotifyAuthLoggedIn(); return false;"
+                                                                                           id="spotifyAuthButton">Link
+                                        Spotify</a></li>{% endif %}
+                            </ul>
+                        </div>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-danger" href="/logout/">Logout</a>
