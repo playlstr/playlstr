@@ -26,6 +26,7 @@
                 </div>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input class="hidden" type="text" id="userFirstnameInput">
                 <input class="hidden" type="text" id="userLastnameInput">
+                {% if my_profile %}
                 <span style="float: right; font-size: 100%; margin-bottom: 4px;" id="enterProfileEdit">
                     <i class="fa fa-edit" id="editProfile" onclick="enterProfileEditMode();"></i>
                 </span>
@@ -35,6 +36,7 @@
                     <i class="fa fa-check btn-outline-success" id="saveProfileEdit"
                        onclick="exitProfileEditMode(true);"></i>
                 </span>
+                {% endif %}
             </li>
         </ul>
     </div>

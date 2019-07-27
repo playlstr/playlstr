@@ -30,9 +30,9 @@
     {% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-md navbar-inverse navbar-light navbar-padding" style="background-color: #2b2a2a">
+<nav class="navbar navbar-expand-sm navbar-inverse navbar-light navbar-padding" style="background-color: #2b2a2a">
     <a class="col-sm-4 navbar-brand navbar-padding" href="/">Playlstr</a>
-    <div class="col-sm-4 navbar-nav mx-auto navbar-padding">
+    <div class="col-sm-4 navbar-nav mx-auto navbar-padding navbar-expand-sm">
         <ul class="navbar-nav justify-content-center d-flex flex-fill">
             <li class="nav-item">
                 <a class="nav-item nav-link" href="#" data-toggle="modal" data-target="#createPlaylistModal">New</a>
@@ -58,11 +58,8 @@
                 </div>
             </li>
         </ul>
-        <ul>
-
-        </ul>
     </div>
-    <div class="col-sm-4 mx-auto navbar-nav navbar-padding">
+    <div class="col-sm-4 mx-auto navbar-nav navbar-padding navbar-expand-sm">
         <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
                 <li class="navbar-item">
