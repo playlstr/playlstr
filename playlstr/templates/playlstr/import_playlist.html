@@ -9,7 +9,7 @@
         Import Playlist
     </div>
     <br><br><br>
-    <div id="spotifyImportContainer" class="centered">
+    <div id="remoteImportContainer" class="centered">
         <div id="spotifyImport" class="input-group mb-3">
             <span class="input-group-text" id="spotifyImportText">
                 Spotify URL
@@ -19,8 +19,17 @@
                 Import
             </button>
         </div>
-        <div id="invalidSpotifyUrl" class="alert alert-danger hidden">Invalid URL</div>
-        <div id="spotifyImportRequestSent" class="centered hidden">
+        <div id="gplayImport" class="input-group mb-3">
+            <span class="input-group-text" id="gplayImportText">
+                Google Play URL
+            </span>
+            <input type="text" class="form-control" id="gplayImportInput">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="importGplayUrl()">
+                Import
+            </button>
+        </div>
+        <div id="invalidUrl" class="alert alert-danger hidden">Invalid URL</div>
+        <div id="waitingForImport" class="centered hidden">
             <div id="spotifyImportSpinner" class="spinner-border">
             </div>
             <h3>Importing...</h3><br>(This may take a minute, we'll let you know if anything goes wrong)
@@ -33,7 +42,7 @@
             <script type="text/javascript">userSpotifyId = '{{ user.spotify_id }}';
             getUserSpotifyPlaylists(true);</script>
         {% endif %}
-        <div id="spotifyImportFailed" class="alert alert-danger hidden">
+        <div id="remoteImportFailed" class="alert alert-danger hidden">
             Failed to import playlist
         </div>
     </div>

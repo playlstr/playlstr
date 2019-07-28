@@ -25,6 +25,7 @@ urlpatterns = [
     path('track/<int:track_id>/', views.track, name='track'),
     path('import/', views.import_playlist, name='import'),
     path('import/spotify/', views.spotify_import, name='spotify_import'),
+    path('import/gplay/', views.gplay_import, name='gplay_import'),
     path('create/', views.create_playlist, name='playlist_create'),
     path('track-autocomplete/', views.track_autocomplete, name='track_autocomplete'),
     path('playlist-update/', views.playlist_update, name='playlist_update'),

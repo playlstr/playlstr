@@ -186,6 +186,8 @@ class Playlist(models.Model):
     # Creator of this playlist
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
                               related_name='owner')
+    spotify_creator_id = models.CharField(max_length=64, null=True, blank=True, default=None)
+    spotify_creator_name = models.CharField(max_length=255, null=True, blank=True, default=None)
     editors = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='editors',
                                      blank=True)  # Users who can modify this playlist
     spotify_id = models.CharField(max_length=64, default=None, null=True, blank=True)

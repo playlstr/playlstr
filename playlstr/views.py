@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
+import lxml.html
 
 from playlstr.util.export import *
 from playlstr.util.client import *
+from playlstr.util.gplay import *
 from .settings import LOGOUT_REDIRECT_URL
 
 
@@ -30,7 +32,7 @@ def import_playlist(request):
 
 def spotify_import(request):
     params = {k: v[0] for (k, v) in dict(request.POST).items()}
-    params['user'] = request.user
+    params['user'] = request.user.id
     params['access_token'] = request.COOKIES.get('spotify-token')
     result = import_spotify(params)
     if result == 'invalid':
@@ -343,3 +345,19 @@ def update_profile(request):
         user.username = changes['username']
     user.save()
     return HttpResponse('Success')
+
+
+def gplay_import(request):
+    if not request.is_ajax():
+        return HttpResponse('', status=400)
+    playlist = request.POST.get('playlist_url')
+    if not playlist or not re.match('^https?://play\.google\.com/music/preview/pl/.*', playlist):
+        return HttpResponse('Invalid playlist', status=400)
+    response = requests.get(playlist)
+    if response.status_code != 200:
+        return HttpResponse('Error getting playlist ({})'.format(response.reason), status=400)
+    html = lxml.html.fromstring(response.content)
+    result = import_gplay_playlist(html)
+    if not result:
+        return HttpResponse('Error importing', status=500)
+    return HttpResponse(result)

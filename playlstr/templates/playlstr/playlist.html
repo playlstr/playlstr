@@ -49,8 +49,13 @@
         <div id="playlist" class="container-fluid">
             <h1 class="text-center" id="playlistName">{{ playlist.name }}</h1>
             {% if playlist.owner %}
-                <h3 class="text-center" id="playlistName">by <a
-                        href="/profile/{{ playlist.owner_id }}/">{{ playlist.owner }}</a></h3>
+                <h4 class="text-center" id="playlistName">by <a
+                        href="/profile/{{ playlist.owner_id }}/">{{ playlist.owner }}</a></h4>
+            {% elif playlist.spotify_creator_id %}
+                <h4 class="text-center" id="playlistName">by <a
+                        href="https://open.spotify.com/user/{{ playlist.spotify_creator_id }}/">
+                    {% if playlist.spotify_creator_name %}{{ playlist.spotify_creator_name }}{% else %}a user{% endif %}
+                    on Spotify</a></h4>
             {% endif %}
             <div id="playlistButtons">
                 <div id="editControlButtons" class="row vmargin-sm">

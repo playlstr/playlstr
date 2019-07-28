@@ -1,5 +1,5 @@
 from .playlist import *
-
+import requests
 import json
 
 DEEZER_API_URL = 'https://api.deezer.com/'

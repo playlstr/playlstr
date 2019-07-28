@@ -5,6 +5,9 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 
 from playlstr.models import *
+from playlstr.util.track import *
+
+from threading import Thread
 
 
 def import_spotify(info: dict) -> str:
@@ -22,8 +25,12 @@ def import_spotify(info: dict) -> str:
     query_headers = {'Authorization': 'Bearer {}'.format(info['access_token'])}
     # Get/create playlist
     playlist_json = requests.get(query_url, headers=query_headers).json()
-    playlist = Playlist(name=playlist_json['name'], last_sync_spotify=timezone.now(), spotify_id=playlist_id,
-                        owner=info['user'])
+    playlist = Playlist(name=playlist_json['name'], last_sync_spotify=timezone.now(), spotify_id=playlist_id)
+    if 'user' in info:
+        playlist.owner = PlaylstrUser.objects.filter(id=info['user']).first()
+    if 'owner' in playlist_json:
+        playlist.spotify_creator_id = playlist_json['owner']['id']
+        playlist.spotify_creator_name = playlist_json['owner']['display_name']
     playlist.save()
     # Get playlist tracks
     tracks_response = requests.get(query_url + '/tracks', headers=query_headers)
@@ -48,10 +55,12 @@ def import_spotify(info: dict) -> str:
     return str(playlist.playlist_id)
 
 
-def track_from_spotify_json(track_json: dict) -> Track:
+def track_from_spotify_json(track_json: dict, match_gplay: bool = True, match_deezer: bool = True) -> Track:
     """
     Return a track matching Spotify track JSON
     :param track_json: the Spotify track JSON
+    :param match_gplay: if true try to link a Google Play ID for the new track
+    :param match_deezer: if true try to link a Deezer ID for the new track
     :return: Track matching Spotify JSON
     """
     # Check if track already exists
@@ -84,6 +93,12 @@ def track_from_spotify_json(track_json: dict) -> Track:
     except KeyError:
         pass
     track.save()
+    if match_gplay and (not track.gplay_id or not track.gplay_album_id):
+        gplay_thread = Thread(target=match_track_gplay, args=(track,))
+        gplay_thread.start()
+    if match_deezer and not track.deezer_id:
+        deezer_thread = Thread(target=match_track_deezer, args=(track,))
+        deezer_thread.start()
     return track
 
 

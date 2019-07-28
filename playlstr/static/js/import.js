@@ -7,13 +7,13 @@ function importSpotifyUrl(import_url = '') {
         return;
     }
     if (import_url.match('^http(s?):\\/\\/open\\.spotify\\.com\\/playlist\\/.{22}\\/?')) {
-        $('#invalidSpotifyUrl').hide();
+        $('#invalidUrl').hide();
     } else {
-        $('#invalidSpotifyUrl').show();
+        $('#invalidUrl').show();
         return;
     }
-    $('#spotifyImportRequestSent').show();
-    if (spotifyAccessToken === null) spotifyImportFail();
+    if (spotifyAccessToken === null) importFail();
+    $('#waitingForImport').show();
     $.ajax({
         type: 'POST',
         url: getPathUrl('/import/spotify'),
@@ -21,17 +21,18 @@ function importSpotifyUrl(import_url = '') {
         cache: false,
         timeout: 30000,
         data: {'playlist_url': import_url, 'access_token': spotifyAccessToken},
-        error: spotifyImportFail,
-        success: spotifyImportComplete,
+        error: importFail,
+        success: importComplete,
     });
 }
 
-function spotifyImportComplete(data) {
+function importComplete(data) {
     window.location.href = '/list/{0}'.format(data);
 }
 
-function spotifyImportFail() {
-    $('spotifyImportFailed').fadeIn().delay(4000).fadeOut();
+function importFail() {
+    $('#waitingForImport').hide();
+    $('#remoteImportFailed').fadeIn().delay(4000).fadeOut();
 }
 
 function importPlaylistFile(fileInput) {
@@ -52,12 +53,12 @@ function sendPlaylistImportRequest(callback) {
         timeout: 30000,
         data: {'name': callback.target.fileName, 'playlist': callback.target.result},
         error: localImportFail,
-        success: spotifyImportComplete,
+        success: importComplete,
     });
 }
 
 function localImportFail() {
-    $('playlistFileImportFailed').fadeIn().delay(4000).fadeOut();
+    $('#playlistFileImportFailed').fadeIn().delay(4000).fadeOut();
 }
 
 function appendUserSpotifyPlaylists(playlists, more_button_exists = false, create_more_button = false) {
@@ -69,4 +70,33 @@ function appendUserSpotifyPlaylists(playlists, more_button_exists = false, creat
     if (create_more_button) {
         $(playlistsDiv).append('<button class="list-group-item list-group-item-action" onclick="getUserSpotifyPlaylists();">More</button>')
     }
+}
+
+function importGplayUrl() {
+    let url = $('#gplayImportInput').val();
+    // Make sure URL is formatted correctly
+    if (url.match('^https?://play\.google\.com/music/listen#?/pl/.*')) {
+        let id_start = url.indexOf('/pl/') + 4;
+        url = 'http://play.google.com/music/preview/pl/' + url.substring(id_start);
+    }
+    if (url.match('^https?://play\.google\.com/music/playlist/.*')) {
+        let id_start = url.indexOf('/playlist/') + 10;
+        url = 'http://play.google.com/music/preview/pl/' + url.substring(id_start);
+    }
+    if (!url.match('^https?://play\.google\.com/music/preview/pl/.*')) {
+        $('#invalidUrl').fadeIn().delay(4000).fadeOut();
+        return;
+    }
+    $('#waitingForImport').show();
+    $.ajax({
+        type: 'POST',
+        url: getPathUrl('/import/gplay/'),
+        headers: {'X-CSRFToken': csrfToken},
+        cache: false,
+        timeout: 30000,
+        data: {'playlist_url': url},
+        error: importFail,
+        success: importComplete,
+    });
+
 }
