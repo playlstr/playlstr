@@ -10,7 +10,17 @@
             <ul class="list-group">
                 <li class="nav-header list-group-item h2 centered" style="border: none;">Recently Updated</li>
                 {% for playlist in newest_playlist_list %}
-                    <li class="list-group-item"><a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a></li>
+                    <li class="list-group-item"><a href="/list/{{ playlist.playlist_id }}/">{{ playlist.name }}</a>
+                        {% if playlist.owner %}
+                            <p style="font-size: 10pt; margin-bottom: 0;">
+                                by <a href="/user/{{ playlist.owner_id }}/">{{ playlist.owner }}</a></p>
+                        {% elif playlist.spotify_creator_id and playlist.spotify_creator_name %}
+                            <p style="font-size: 10pt; margin-bottom: 0;">
+                                by <a
+                                    href="https://open.spotify.com/user/{{ playlist.spotify_creator_id }}">{{ playlist.spotify_creator_name }}</a>
+                            </p>
+                        {% endif %}
+                    </li>
                 {% endfor %}
             </ul>
         {% else %}

@@ -5,7 +5,7 @@ let successfulLink = false;
 
 function hideSpotifyAuth() {
     $(document).ready(function () {
-
+        $('#spotifyAuthButton').css('color', '#2b2a2a');
     });
 }
 
