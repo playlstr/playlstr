@@ -1,8 +1,8 @@
 ## [playlstr](http://playlstr.me)
 ### Features
 - Create and share playlists online for free
-- Import existing playlists from Spotify
-- Import local playlists using local audio file metadata with the desktop client
+- Import existing playlists from Spotify or Google Play
+- Import local playlists using local audio file metadata with the [desktop client](http://github.com/git-uname/playlstr-client)
 - Upload local playlist files to import (using filenames to try to find matching tracks)
 - Export playlists as list of tracks
 - Export playlists to Spotify
@@ -13,7 +13,7 @@
 Ordered approximately by expected implementation date (soonest first)
 - Support for more streaming services
 - Build up playlists from other playlists ("sublists")
-- beets plugin for exporting to local files
+- Export to local files with the [desktop client](http://github.com/git-uname/playlstr-client)
 ### Development
 - Install Python 3.6+ and PostgreSQL 11.2+ (other PostgreSQL versions may work but are unsupported)
 - `pip install -r requirements.txt`
