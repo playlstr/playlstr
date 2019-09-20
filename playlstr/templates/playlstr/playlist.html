@@ -57,6 +57,7 @@
                     {% if playlist.spotify_creator_name %}{{ playlist.spotify_creator_name }}{% else %}a user{% endif %}
                     on Spotify</a></h4>
             {% endif %}
+            <h4 class="text-center" id="tracksCount">{{tracks|length}} tracks</h4>
             <div id="playlistButtons">
                 <div id="editControlButtons" class="row vmargin-sm">
                     {% if user.is_authenticated %}

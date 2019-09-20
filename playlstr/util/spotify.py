@@ -49,13 +49,14 @@ def import_spotify(info: dict) -> str:
             track = track_from_spotify_json(j['track'])
             try:
                 PlaylistTrack.objects.create(playlist=playlist, track=track, index=index)
-            except IntegrityError:
+            except IntegrityError as e:
+                print('Error adding track {}: {}'.format(str(track), str(e)))
                 continue
         tracks_json = requests.get(tracks_json['next'], headers=query_headers).json()
     return str(playlist.playlist_id)
 
 
-def track_from_spotify_json(track_json: dict, match_gplay: bool = True, match_deezer: bool = True) -> Track:
+def track_from_spotify_json(track_json: dict, match_gplay: bool = False, match_deezer: bool = False) -> Track:
     """
     Return a track matching Spotify track JSON
     :param track_json: the Spotify track JSON
@@ -63,13 +64,16 @@ def track_from_spotify_json(track_json: dict, match_gplay: bool = True, match_de
     :param match_deezer: if true try to link a Deezer ID for the new track
     :return: Track matching Spotify JSON
     """
-    # Check if track already exists
-    query = Q(spotify_id=track_json['id'])
-    try:
-        query.add(Q(isrc=track_json['external_ids']['isrc']), Q.OR)
-    except:
-        pass
-    track = Track.objects.filter(query).first()
+    # Check if track exists with the same Spotify ID
+    if track_json['id'] is None:
+        track = None
+    else:
+        query = Q(spotify_id=track_json['id'])
+        try:
+            query.add(Q(isrc=track_json['external_ids']['isrc']), Q.OR)
+        except KeyError:
+            pass
+        track = Track.objects.filter(query).first()
     if track is None:
         title = track_json['name']
         try:
