@@ -5,12 +5,16 @@ from playlstr.util.playlist import *
 
 class SpotifyImportBasicTestCase(TestCase):
     def test_invalid_access_token(self):
-        result = import_spotify({'playlist_url': SPOTIFY_TEST_PLAYLIST_PUBLIC_URL, 'access_token': 'token'})
-        self.assertEqual(result, 'Unauthorized')
+        result = import_spotify(
+            {"playlist_url": SPOTIFY_TEST_PLAYLIST_PUBLIC_URL, "access_token": "token"}
+        )
+        self.assertEqual(result, "Unauthorized")
 
     def test_malformed_playlist_url(self):
-        result = import_spotify({'playlist_url': 'playlist', 'access_token': VALID_SPOTIFY_ACCESS_TOKEN})
-        self.assertEqual(result, 'Invalid URL')
+        result = import_spotify(
+            {"playlist_url": "playlist", "access_token": VALID_SPOTIFY_ACCESS_TOKEN}
+        )
+        self.assertEqual(result, "Invalid URL")
 
     '''
     It seems the API returns a valid playlist object even if you don't have permission to view the playlist
@@ -27,11 +31,17 @@ class SpotifyImportPublicTestCase(TestCase):
     def setUp(self):
         # Imported playlist's id
         self.pid = import_spotify(
-            {'playlist_url': SPOTIFY_TEST_PLAYLIST_PUBLIC_URL, 'access_token': VALID_SPOTIFY_ACCESS_TOKEN})
-        self.assertIsInstance(self.pid, int, 'Created valid playlist id')
-        self.assertGreaterEqual(self.pid, 0, 'Created valid playlist id')
+            {
+                "playlist_url": SPOTIFY_TEST_PLAYLIST_PUBLIC_URL,
+                "access_token": VALID_SPOTIFY_ACCESS_TOKEN,
+            }
+        )
+        self.assertIsInstance(self.pid, int, "Created valid playlist id")
+        self.assertGreaterEqual(self.pid, 0, "Created valid playlist id")
         self.playlist = Playlist.objects.get(playlist_id=self.pid)
-        self.assertIsInstance(self.playlist, Playlist, "Only one playlist with playlist ID")
+        self.assertIsInstance(
+            self.playlist, Playlist, "Only one playlist with playlist ID"
+        )
 
     def test_import_creates_playlist(self):
         self.assertTrue(Playlist.objects.filter(playlist_id=self.pid).exists())
@@ -39,8 +49,16 @@ class SpotifyImportPublicTestCase(TestCase):
     def test_import_correct_playlist_metadata(self):
         """Import correct playlist ID and name"""
         playlist = self.playlist
-        self.assertEqual(playlist.spotify_id, SPOTIFY_TEST_PLAYLIST_PUBLIC_ID, 'Import correct spotify ID')
-        self.assertEqual(playlist.name, SPOTIFY_TEST_PLAYLIST_PUBLIC_NAME, 'Import correct playlist name')
+        self.assertEqual(
+            playlist.spotify_id,
+            SPOTIFY_TEST_PLAYLIST_PUBLIC_ID,
+            "Import correct spotify ID",
+        )
+        self.assertEqual(
+            playlist.name,
+            SPOTIFY_TEST_PLAYLIST_PUBLIC_NAME,
+            "Import correct playlist name",
+        )
 
     def test_import_creates_first_page_tracks(self):
         """Create tracks 0-100 of the playlist in the database (1st api call)"""
