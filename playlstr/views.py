@@ -11,6 +11,11 @@ from playlstr.util.gplay import *
 from .settings import LOGOUT_REDIRECT_URL
 
 
+# TODO do we need this
+def is_ajax(request):
+    return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
+
+
 def index(request):
     return render(
         request,
@@ -65,7 +70,7 @@ def create_playlist(request):
 
 
 def track_autocomplete(request):
-    if not request.is_ajax():
+    if not is_ajax(request):
         return HttpResponse("Invalid", status=400)
     try:
         term = request.POST["term"]
@@ -94,7 +99,7 @@ def track_autocomplete(request):
 
 
 def playlist_update(request):
-    if not request.is_ajax() or "playlist" not in request.POST:
+    if not is_ajax(request) or "playlist" not in request.POST:
         return HttpResponse("Invalid", status=400)
     try:
         plist = Playlist.objects.get(playlist_id=request.POST["playlist"])
@@ -114,7 +119,7 @@ def logout_view(request):
 
 
 def user_spotify_token(request):
-    if not request.is_ajax() or request.user is None:
+    if not is_ajax(request) or request.user is None:
         return HttpResponse("Invalid", status=400)
     json_resp = get_user_spotify_token(request.user)
     if "error" in json_resp:
@@ -123,7 +128,7 @@ def user_spotify_token(request):
 
 
 def spotify_auth_user(request):
-    if not request.is_ajax() or request.user is None:
+    if not is_ajax(request) or request.user is None:
         return HttpResponse("Invalid", status=400)
     return HttpResponse(
         spotify_parse_code({"post": request.POST, "user": request.user})
@@ -132,7 +137,7 @@ def spotify_auth_user(request):
 
 def local_file_import(request):
     if (
-        not request.is_ajax()
+        not is_ajax(request)
         or "playlist" not in request.POST
         or "name" not in request.POST
     ):
@@ -266,7 +271,7 @@ def create_track(request):
     if not request.user or not request.user.is_authenticated:
         return HttpResponse("Login first", status=400)
     if (
-        not request.is_ajax()
+        not is_ajax(request)
         or not request.POST
         or "title" not in request.POST
         or request.POST["title"] is None
@@ -396,7 +401,7 @@ def client_link(request):
 def clear_linked_clients(request):
     if not request.user or not request.user.is_authenticated:
         return HttpResponse("Login first", status=400)
-    if not request.is_ajax():
+    if not is_ajax(request):
         return HttpResponse("", status=400)
     try:
         user = PlaylstrUser.objects.get(id=request.user.id)
@@ -409,7 +414,7 @@ def clear_linked_clients(request):
 
 @login_required
 def update_profile(request):
-    if not (request.user and request.is_ajax() and request.POST.get("changes")):
+    if not (request.user and is_ajax(request) and request.POST.get("changes")):
         return HttpResponse("", status=400)
     try:
         user = PlaylstrUser.objects.get(id=request.user.id)
@@ -432,7 +437,7 @@ def update_profile(request):
 
 
 def gplay_import(request):
-    if not request.is_ajax():
+    if not is_ajax(request):
         return HttpResponse("", status=400)
     playlist = request.POST.get("playlist_url")
     if not playlist or not re.match(
