@@ -29,7 +29,11 @@ class PlaylistUpdateTestCase(TestCase):
 
     def test_invalid_playlist(self):
         data = dict_to_querydict({})
-        self.assertEqual(update_playlist(data), "invalid playlist")
+        self.assertEqual(
+            ("invalid playlist", 400),
+            update_playlist(data),
+            "Malformed playlist returns error",
+        )
 
     def test_invalid_access_token_returns_error(self):
         data = dict_to_querydict(
@@ -40,7 +44,7 @@ class PlaylistUpdateTestCase(TestCase):
             }
         )
         self.assertEqual(
-            update_playlist(data), "invalid token", "Invalid token returns error"
+            ("invalid token", 400), update_playlist(data), "Invalid token returns error"
         )
 
     def test_invalid_access_token_doesnt_change_db(self):
@@ -54,7 +58,9 @@ class PlaylistUpdateTestCase(TestCase):
                 "added": "[{}, {}]".format(self.track1.track_id, self.track2.track_id),
             }
         )
-        self.assertEqual("success", update_playlist(data), "No error adding tracks")
+        self.assertEqual(
+            ("success", 200), update_playlist(data), "No error adding tracks"
+        )
         ptracks = PlaylistTrack.objects.filter(playlist=self.playlist).all()
         tracks = [t.track for t in ptracks]
         self.assertTrue(self.track1 in tracks, "Add track")
@@ -74,7 +80,9 @@ class PlaylistUpdateTestCase(TestCase):
                 ),
             }
         )
-        self.assertEqual("success", update_playlist(data), "No error deleting tracks")
+        self.assertEqual(
+            ("success", 200), update_playlist(data), "No error deleting tracks"
+        )
         ptracks = PlaylistTrack.objects.filter(playlist=self.playlist).all()
         tracks = [t.track for t in ptracks]
         self.assertFalse(self.track1 in tracks, "Delete track")

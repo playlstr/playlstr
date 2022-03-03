@@ -17,11 +17,11 @@ def playlist_add_track(playlist: Playlist, track: Track) -> PlaylistTrack:
         return PlaylistTrack.objects.create(playlist=playlist, track=track, index=index)
 
 
-def update_playlist(data: dict) -> Optional[str]:
+def update_playlist(data: dict) -> (str, int):
     """
     Update playlist with data from playlist edit view
     :param data: dict of data to add to playlist
-    :return: error message if an error occurred else None
+    :return: result, status code
     """
     changed = False
     # Validate spotify token before changing anything in the DB
@@ -31,15 +31,15 @@ def update_playlist(data: dict) -> Optional[str]:
         spotify_ids = json.loads(data["spotify_new"])
         if len(spotify_ids) > 0:
             if "spotify_token" not in data:
-                return "invalid token"
+                return "invalid token", 400
             spotify_token = data["spotify_token"]
             if not valid_spotify_token(spotify_token):
-                return "invalid token"
+                return "invalid token", 400
     # Get playlist
     try:
         playlist = Playlist.objects.get(playlist_id=int(data["playlist"]))
     except (KeyError, ValueError):
-        return "invalid playlist"
+        return "invalid playlist", 400
     # Update playlist name
     try:
         new_name = data["playlist_name"]
@@ -87,7 +87,7 @@ def update_playlist(data: dict) -> Optional[str]:
     if changed:
         playlist.edit_date = timezone.now()
         playlist.save()
-    return None
+    return "success", 200
 
 
 def client_import_parse(name: str, tracks: list, user: PlaylstrUser) -> int:

@@ -2,19 +2,28 @@ from django.test import TestCase
 
 from playlstr.util.playlist import *
 
+SPOTIFY_TEST_PLAYLIST_PUBLIC_URL = (
+    "https://open.spotify.com/playlist/3pGugHtpJav8WIxuQr97uw?si=781d4088fba34ffb"
+)
+SPOTIFY_TEST_PLAYLIST_PUBLIC_NAME = "lifting"
+SPOTIFY_TEST_PLAYLIST_PUBLIC_ID = "3pGugHtpJav8WIxuQr97uw"
+
 
 class SpotifyImportBasicTestCase(TestCase):
     def test_invalid_access_token(self):
         result = import_spotify(
             {"playlist_url": SPOTIFY_TEST_PLAYLIST_PUBLIC_URL, "access_token": "token"}
         )
-        self.assertEqual(result, "Unauthorized")
+        self.assertEqual(
+            ("Invalid access token", 401), result, "Error for invalid access token"
+        )
 
     def test_malformed_playlist_url(self):
-        result = import_spotify(
+        result, status = import_spotify(
             {"playlist_url": "playlist", "access_token": VALID_SPOTIFY_ACCESS_TOKEN}
         )
         self.assertEqual(result, "Invalid URL")
+        self.assertEqual(status, 400)
 
     '''
     It seems the API returns a valid playlist object even if you don't have permission to view the playlist
@@ -30,13 +39,18 @@ class SpotifyImportBasicTestCase(TestCase):
 class SpotifyImportPublicTestCase(TestCase):
     def setUp(self):
         # Imported playlist's id
-        self.pid = import_spotify(
+        self.pid, status = import_spotify(
             {
                 "playlist_url": SPOTIFY_TEST_PLAYLIST_PUBLIC_URL,
                 "access_token": VALID_SPOTIFY_ACCESS_TOKEN,
             }
         )
-        self.assertIsInstance(self.pid, int, "Created valid playlist id")
+        if status != 200:
+            raise ValueError(
+                "Can't do import tests when import returned", self.pid, status
+            )
+        self.assertIsInstance(self.pid, str, "Created valid playlist id")
+        self.pid = int(self.pid)
         self.assertGreaterEqual(self.pid, 0, "Created valid playlist id")
         self.playlist = Playlist.objects.get(playlist_id=self.pid)
         self.assertIsInstance(

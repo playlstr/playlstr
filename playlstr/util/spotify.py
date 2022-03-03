@@ -10,24 +10,33 @@ from playlstr.util.track import *
 from threading import Thread
 
 
-def import_spotify(info: dict) -> str:
+def import_spotify(info: dict) -> (str, int):
     """
     Import Spotify playlist and return playlist ID or cause of error if unsuccessful
     :param info: dict where playlist_url is the url of the playlist and access_token is the Spotify access token
-    :return: playlist ID or cause of error if unsuccessful
+    :return: playlist ID or cause of error if unsuccessful, status code
     """
     url = info["playlist_url"]
     # Validate URL
-    if not (
-        isinstance(url, str)
-        and re.match(r"^http(s?)://open\.spotify\.com/playlist/[a-zA-Z\d]*/?", url)
-    ):
-        return "invalid"
-    playlist_id = url[-23:0] if url[-1] == "/" else url[-22:]
+    matches = (
+        re.match(r"^https?://open\.spotify\.com/playlist/([a-zA-Z\d]*)/?", url)
+        if isinstance(url, str)
+        else None
+    )
+    if not matches:
+        return "Invalid URL", 400
+    playlist_id = matches.group(1)
     query_url = "https://api.spotify.com/v1/playlists/" + playlist_id
     query_headers = {"Authorization": "Bearer {}".format(info["access_token"])}
     # Get/create playlist
     playlist_json = requests.get(query_url, headers=query_headers).json()
+    if "error" in playlist_json:
+        status = playlist_json["error"].get("status")
+        message = playlist_json["error"].get("message")
+        return (
+            message if message else "Error retrieving playlist",
+            status if status else 500,
+        )
     playlist = Playlist(
         name=playlist_json["name"],
         last_sync_spotify=timezone.now(),
@@ -42,12 +51,10 @@ def import_spotify(info: dict) -> str:
     # Get playlist tracks
     tracks_response = requests.get(query_url + "/tracks", headers=query_headers)
     if tracks_response.status_code != 200:
-        return tracks_response.reason
+        return tracks_response.reason, 500
     tracks_json = tracks_response.json()
-    try:
-        return "Error: " + tracks_json["error_description"]
-    except KeyError:
-        pass
+    if "error_description" in tracks_json:
+        return tracks_json["error_description"], 500
     # Get list of tracks
     index = -1
     while "next" in tracks_json and tracks_json["next"] is not None:
@@ -62,7 +69,7 @@ def import_spotify(info: dict) -> str:
                 print("Error adding track {}: {}".format(str(track), str(e)))
                 continue
         tracks_json = requests.get(tracks_json["next"], headers=query_headers).json()
-    return str(playlist.playlist_id)
+    return str(playlist.playlist_id), 200
 
 
 def track_from_spotify_json(

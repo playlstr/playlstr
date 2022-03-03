@@ -51,10 +51,8 @@ def spotify_import(request):
     params = {k: v[0] for (k, v) in dict(request.POST).items()}
     params["user"] = request.user.id
     params["access_token"] = request.COOKIES.get("spotify-token")
-    result = import_spotify(params)
-    if result == "invalid":
-        return HttpResponse("Invalid URL", status=400)
-    return HttpResponse(result)
+    result, status = import_spotify(params)
+    return HttpResponse(result, status)
 
 
 def create_playlist(request):
@@ -107,10 +105,8 @@ def playlist_update(request):
         return HttpResponse("Invalid", status=400)
     if request.user not in plist.editors.all() and request.user != plist.owner:
         return HttpResponse("Unauthorized", status=401)
-    update_result = update_playlist(request.POST)
-    if update_result:
-        return HttpResponse(update_result, status=400)
-    return HttpResponse("success")
+    result, status = update_playlist(request.POST)
+    return HttpResponse(result, status)
 
 
 def logout_view(request):
